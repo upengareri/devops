@@ -30,3 +30,13 @@ DevOps Notes:
 	(HashiCorp has separate tool for creating pre-baked images (packer) and separate tool for provisioning (terraform). We just need to create a JSON file and pass installation script as user-data as part of creation in terraform and it will take care of developing the AMI for us.)
 	- **To know how to setup jenkins master-slave architecture using packer and terraform, follow the link - https://www.velotio.com/engineering-blog/setup-jenkins-master-slave-architecture **
 
+- **Ansible**
+	- It's a configuration management tool that can be used to install packages
+	- It's other alternatives are Chef, Puppet and Salt
+
+
+---
+Use of Ansible, Packer and Terraform to spin up Windows machine in AWS - https://yetiops.net/posts/packer-ansible-windows-aws/
+Comprehensive DevOps Guide - https://devopscube.com/become-devops-engineer/ 
+Intersting girl - https://charity.wtf/2016/04/14/scrapbag-of-useful-terraform-tips/ 
+
