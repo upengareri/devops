@@ -29,6 +29,7 @@ DevOps Notes:
 	- Packer does not manage the image. Packer only builds images. After they're built, it is up to you to launch or destroy them
 	(HashiCorp has separate tool for creating pre-baked images (packer) and separate tool for provisioning (terraform). We just need to create a JSON file and pass installation script as user-data as part of creation in terraform and it will take care of developing the AMI for us.)
 	- **To know how to setup jenkins master-slave architecture using packer and terraform, follow the link - https://www.velotio.com/engineering-blog/setup-jenkins-master-slave-architecture **
+	- **Beginner tutorial on Packer with examples: https://devopscube.com/packer-tutorial-for-beginners/**
 
 - **Ansible**
 	- It's a configuration management tool that can be used to install packages
@@ -37,6 +38,8 @@ DevOps Notes:
 
 ---
 Use of Ansible, Packer and Terraform to spin up Windows machine in AWS - https://yetiops.net/posts/packer-ansible-windows-aws/
+
 Comprehensive DevOps Guide - https://devopscube.com/become-devops-engineer/ 
+
 Intersting girl - https://charity.wtf/2016/04/14/scrapbag-of-useful-terraform-tips/ 
 
