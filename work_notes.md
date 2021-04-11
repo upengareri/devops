@@ -47,11 +47,19 @@ DevOps Notes:
 		3. **MUST READ** - https://www.guru99.com/ansible-tutorial.html#1
 		4. **DETAILED** - https://serversforhackers.com/c/an-ansible2-tutorial
 
-
----
+-----
 Use of Ansible, Packer and Terraform to spin up Windows machine in AWS - https://yetiops.net/posts/packer-ansible-windows-aws/
 
 Comprehensive DevOps Guide - https://devopscube.com/become-devops-engineer/ 
 
-Intersting girl - https://charity.wtf/2016/04/14/scrapbag-of-useful-terraform-tips/ 
+Intersting girl - https://charity.wtf/2016/04/14/scrapbag-of-useful-terraform-tips/
 
+-----
+
+### NGINX
+
+- [NGINX ebook](https://www.nginx.com/resources/library/complete-nginx-cookbook/?utm_medium=cpc&utm_source=google&utm_campaign=emea_dach-nx_mad&utm_content=eb-textad-retarget-cnvrt&_bt=491303871594&_bk=nginx%20cookbook&_bm=p&_bn=g&_bg=99541613406&gclid=CjwKCAjwvMqDBhB8EiwA2iSmPDkyzC-YPjaQZ30euPa-3qiI6ZGSjVO-SKGqcmjHXEdSnjnDTmecfRoC4IwQAvD_BwE)
+
+-----
+
+> [Server For Hackers](https://serversforhackers.com/s/start-here)
