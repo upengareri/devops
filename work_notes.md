@@ -28,8 +28,9 @@ DevOps Notes:
 	- In AWS, we can do this with CloudFormation itself
 	- Packer does not manage the image. Packer only builds images. After they're built, it is up to you to launch or destroy them
 	(HashiCorp has separate tool for creating pre-baked images (packer) and separate tool for provisioning (terraform). We just need to create a JSON file and pass installation script as user-data as part of creation in terraform and it will take care of developing the AMI for us.)
-	- **To know how to setup jenkins master-slave architecture using packer and terraform, follow the link - https://www.velotio.com/engineering-blog/setup-jenkins-master-slave-architecture **
-	- **Beginner tutorial on Packer with examples: https://devopscube.com/packer-tutorial-for-beginners/**
+	- **MUST READ** Packer tutorial for beginners - https://devopscube.com/packer-tutorial-for-beginners/ and official guide - https://learn.hashicorp.com/tutorials/packer/getting-started-build-image
+	- To know how to setup jenkins master-slave architecture using packer and terraform, follow the link - https://www.velotio.com/engineering-blog/setup-jenkins-master-slave-architecture
+	- Another article to setup windows jenkins slave using packer and terraform - https://www.eficode.com/blog/packer-terraform
 
 - **Ansible**
 	- It's a configuration management tool that can be used to install packages
