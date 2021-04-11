@@ -33,7 +33,18 @@ DevOps Notes:
 
 - **Ansible**
 	- It's a configuration management tool that can be used to install packages
-	- It's other alternatives are Chef, Puppet and Salt
+	- It's other alternatives are Chef, Puppet, Salt, Shell, Powershell
+	> _Terminologies_: Playbook, plays, hosts, tasks: A playbook is an yaml file that consists of one or more plays. A play contains hosts and tasks. A hosts is where the tasks will run. A task is an action to be applied.
+
+	> Inventory: An inventory file defines the hosts and host groups on which the tasks are applied. By default ansible uses “/etc/ansible/hosts” as the default inventory. Of course you can create your own inventory and use -i flag to tell ansible to use your inventory rather than the default one.
+	
+	> Control Host: It is a host from where ansible commands will be run. Control host will need ssh access to target hosts to be able to login and run the automation.
+
+	- Useful Beginner Links
+		1. Configure Ansible Server and Hosts - https://devopscube.com/install-configure-ansible-server-nodes/ 
+		2. https://medium.com/@sixev/how-to-get-started-with-ansible-in-10-minutes-e174037341f3
+		3. **MUST READ** - https://www.guru99.com/ansible-tutorial.html#1
+		4. **DETAILED** - https://serversforhackers.com/c/an-ansible2-tutorial
 
 
 ---
