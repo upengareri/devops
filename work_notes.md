@@ -54,6 +54,8 @@ Comprehensive DevOps Guide - https://devopscube.com/become-devops-engineer/
 
 Intersting girl - https://charity.wtf/2016/04/14/scrapbag-of-useful-terraform-tips/
 
+Devops nice articles - https://dvops.cloud/
+
 -----
 
 ### NGINX
@@ -63,3 +65,38 @@ Intersting girl - https://charity.wtf/2016/04/14/scrapbag-of-useful-terraform-ti
 -----
 
 > [Server For Hackers](https://serversforhackers.com/s/start-here)
+
+**SSH Protocol**
+
+| Client        | Server      |
+| ------------- |-------------|
+|	- id_rsa    |             |
+|	- id_rsa.pub       ------(copy)------> |    - ~/.ssh/authorized_keys |
+
+
+The above diagram shows that we create ssh public and private key pair using `ssh-keygen` (rsa or more recent ecdsa encryption algo type) and then copy the public part to the servers `authorized_keys` file by sshing/logging in to the server.
+
+Now what happens when we perform the ssh - `ssh -i /path/to/private_key` bob@server
+
+1. Server verification by client happens first
+	1.1 Server provides its public key/fingerprint
+	1.2 Client ssh asks OS - "hey, we are connecting to this guy (public kye). Is this the right guy or is it "man-in-the-middle" attack"?
+	1.3 OS checks **known_hosts** file to see any matching public key or fingerprint is found
+	1.4 If yes then clinet authenticates server else it prompts us to decide - e.g (github) -
+
+		```
+		> The authenticity of host 'github.com (IP ADDRESS)' can't be established.
+		> RSA key fingerprint is SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8.
+		> Are you sure you want to continue connecting (yes/no)?
+		```
+
+		Verify that the fingerprint in the message you see matches GitHub's RSA public key fingerprint. If it does, then type yes
+
+2. Client verification by server happens next
+	2.1 SSH asks OS - "hey, bob is asking for connection. This is his private key."
+	2.2 OS takes private key and matches with public keys in **authorized_keys** file for a match
+	2.3 If yes (matched), then access granted else not
+
+> For more details check - 1. [logging in to your server](https://serversforhackers.com/c/logging-into-your-server) 2. [authorized_keys vs known_hosts](https://security.stackexchange.com/questions/20706/what-is-the-difference-between-authorized-keys-and-known-hosts-file-for-ssh)
+
+> Use cases: 1. **[Jenkins Master-Slave connection](https://dvops.cloud/2019/03/14/configuring-jenkins-slaves-on-aws-ec2/)** 2. [Github ssh](https://docs.github.com/en/github/authenticating-to-github/testing-your-ssh-connection)
