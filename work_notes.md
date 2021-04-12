@@ -66,13 +66,12 @@ Devops nice articles - https://dvops.cloud/
 
 > [Server For Hackers](https://serversforhackers.com/s/start-here)
 
-**SSH Protocol**
+### SSH Protocol
 
 | Client        | Server      |
 | ------------- |-------------|
-|	- id_rsa    |             |
-|	- id_rsa.pub       ------(copy)------> |    - ~/.ssh/authorized_keys |
-
+|id_rsa         |             |
+|id_rsa.pub       ------(copy)------> |~/.ssh/authorized_keys |
 
 The above diagram shows that we create ssh public and private key pair using `ssh-keygen` (rsa or more recent ecdsa encryption algo type) and then copy the public part to the servers `authorized_keys` file by sshing/logging in to the server.
 
@@ -100,3 +99,8 @@ Now what happens when we perform the ssh - `ssh -i /path/to/private_key` bob@ser
 > For more details check - 1. [logging in to your server](https://serversforhackers.com/c/logging-into-your-server) 2. [authorized_keys vs known_hosts](https://security.stackexchange.com/questions/20706/what-is-the-difference-between-authorized-keys-and-known-hosts-file-for-ssh)
 
 > Use cases: 1. **[Jenkins Master-Slave connection](https://dvops.cloud/2019/03/14/configuring-jenkins-slaves-on-aws-ec2/)** 2. [Github ssh](https://docs.github.com/en/github/authenticating-to-github/testing-your-ssh-connection)
+
+### Nginx
+
+- Understands HTTP/S calls and fills/converts into Gateway specific requests
+- Also supports caching and storage of static files
