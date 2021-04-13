@@ -31,6 +31,21 @@ DevOps Notes:
 	- **MUST READ** Packer tutorial for beginners - https://devopscube.com/packer-tutorial-for-beginners/ and official guide - https://learn.hashicorp.com/tutorials/packer/getting-started-build-image
 	- To know how to setup jenkins master-slave architecture using packer and terraform, follow the link - https://www.velotio.com/engineering-blog/setup-jenkins-master-slave-architecture
 	- Another article to setup windows jenkins slave using packer and terraform - https://www.eficode.com/blog/packer-terraform
+	- > Snippet from [opstodevops](http://www.opstodevops.tech/blog/2020/06/16/hashicorp-packer-windowsami.html) which says it correctly about packer for aws
+	```
+	Packer can build machine images for a number of different cloud platforms but here I will focus on the amazon-ebs builder, which will create an EBS-backed AMI.
+At a high level, Packer performs these steps:
+
+Read configuration settings from a json template file
+Uses the AWS API to spin up an EC2 instance
+Connect to the instance and provision it using WinRM on Port 5986
+Shut down and snapshot the instance
+Create an Amazon Machine Image (AMI) from the snapshot
+Clean up resources like security group, ec2 key-pair and ec2 instance used in the process
+
+Take a note that amazon-ebs builder establishes a basic communicator for provisioning & for Windows it is WinRM on 5985. But for better security & to prevent eavesdropping during image provisioning, I will be using WinRM for HTPPS on Port 5986 by encrypting the traffic using self signed certificate.
+```
+ 
 
 - **Ansible**
 	- It's a configuration management tool that can be used to install packages
