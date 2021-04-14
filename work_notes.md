@@ -119,3 +119,26 @@ Now what happens when we perform the ssh - `ssh -i /path/to/private_key` bob@ser
 
 - Understands HTTP/S calls and fills/converts into Gateway specific requests
 - Also supports caching and storage of static files
+
+
+
+## AWS Refresher
+
+-----
+### Refresher on private subnets
+There are basically two differences between a public and private subnet. First of all, a public subnet uses an Internet Gateway. This allows instances in that subnet to communicate with the outside world. Secondly, in order to do this, each instance needs an Elastic IP address.
+
+A private subnet is reachable internally only, while an instance running in a public subnet can be reached directly using the Elastic IP.**The routing table basically determines whether a subnet is private or not.**
+
+In order to obtain a static private IP address, you don't need a private subnet. If your use case allows for the instance to be reachable from the Internet, you might want to use a single public subnet instead. That way you will be able to assign a public (Elastic IP) as well as a private static IP address. You can use security group rules to specify which traffic to allow from the Internet.
+
+-----
+Instance profile and role
+
+-----
+
+## GIT gyan
+
+- We have the option in GitLab UI to restrict branch name via regex
+	- repo -> settings -> repository -> push rules
+
