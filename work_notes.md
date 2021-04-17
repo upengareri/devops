@@ -73,12 +73,6 @@ Devops nice articles - https://dvops.cloud/
 
 -----
 
-### NGINX
-
-- [NGINX ebook](https://www.nginx.com/resources/library/complete-nginx-cookbook/?utm_medium=cpc&utm_source=google&utm_campaign=emea_dach-nx_mad&utm_content=eb-textad-retarget-cnvrt&_bt=491303871594&_bk=nginx%20cookbook&_bm=p&_bn=g&_bg=99541613406&gclid=CjwKCAjwvMqDBhB8EiwA2iSmPDkyzC-YPjaQZ30euPa-3qiI6ZGSjVO-SKGqcmjHXEdSnjnDTmecfRoC4IwQAvD_BwE)
-
------
-
 > [Server For Hackers](https://serversforhackers.com/s/start-here)
 
 ### SSH Protocol
@@ -119,6 +113,10 @@ Now what happens when we perform the ssh - `ssh -i /path/to/private_key` bob@ser
 
 - Understands HTTP/S calls and fills/converts into Gateway specific requests
 - Also supports caching and storage of static files
+- Some useful links:
+    - https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-18-04
+    - https://www.netguru.com/codestories/nginx-tutorial-basics-concepts
+    - https://www.youtube.com/watch?v=D5grhfkjjXE
 
 
 
