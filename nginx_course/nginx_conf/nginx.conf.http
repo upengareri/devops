@@ -1,0 +1,45 @@
+http {
+    server {
+        listen 80;
+
+        location / {
+            proxy_pass http://allbackend/;
+        }
+
+        location /app1 {
+            proxy_pass http://app1backend/;
+        }
+
+        location /app2 {
+            proxy_pass http://app2backend/;
+        }
+
+        location /admin {
+            return 403;
+        } # block admin access from root/admin but accessible from root:port/admin
+    }
+
+    upstream allbackend {
+        # by default the algo used to select the server is `round-robin`
+        # ip_hash - nginx chooses one server and makes a sticky session (in general stateful app is not a good idea \
+        # as the machine/docker can be destroyed anytime especially in kubernetes cluster but there are some use cases \
+        # where it is helpful like shopping cart)
+        # ip_hash;
+        server 127.0.0.1:2222;
+        server 127.0.0.1:3333;
+        server 127.0.0.1:4444;
+        server 127.0.0.1:5555;
+    }
+
+    upstream app1backend {
+        server 127.0.0.1:2222;
+        server 127.0.0.1:3333;
+    }
+
+    upstream app2backend {
+        server 127.0.0.1:4444;
+        server 127.0.0.1:5555;
+    }
+}
+
+events {}

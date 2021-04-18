@@ -1,0 +1,28 @@
+http {
+    server {
+        listen 8080;
+        root /Users/Upen/Desktop/devops_hub/devops/nginx_course/web;  # default location for homepage, site1 and site2
+
+        location /images {
+            root /Users/Upen/Desktop/devops_hub/devops/nginx_course/;
+        }  # I want images to be served from another location
+
+        location ~ .jpg$ {
+            return 403;
+        }  # I want to hide jpg images from users
+    }
+    
+    server {
+        listen 8888;
+
+        location / {
+            proxy_pass http://localhost:8080/;
+        }  # example of aliasing/symlink
+
+        location /img {
+            proxy_pass http://localhost:8080/images;
+        }
+    }
+}
+
+events {}

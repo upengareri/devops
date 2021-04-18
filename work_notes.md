@@ -111,13 +111,57 @@ Now what happens when we perform the ssh - `ssh -i /path/to/private_key` bob@ser
 
 ### Nginx
 
+- It can act both as web server (serve http content) and as reverse proxy (load balance to backend servers)
 - Understands HTTP/S calls and fills/converts into Gateway specific requests
 - Also supports caching and storage of static files
 - Some useful links:
-    - https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-18-04
-    - https://www.netguru.com/codestories/nginx-tutorial-basics-concepts
-    - https://www.youtube.com/watch?v=D5grhfkjjXE
+  - https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-18-04
+  - https://www.netguru.com/codestories/nginx-tutorial-basics-concepts
+  - https://www.youtube.com/watch?v=D5grhfkjjXE
 
+
+__File Configurations (in yum/apt base installations):__
+* Configuration Files: `/etc/nginx`
+* Binary Files: `/usr/sbin/`
+* Log Diretory or Files: `/var/log/nginx`
+* Data or Documentary Files: `/usr/share/nginx`
+
+__To run nginx in docker:__
+```bash
+docker run -d \
+	--name nginx
+	-p 80:80
+	-v /var/conf.d:/etc/nginx/conf.d
+	nginx
+```
+Here I have mounted the configuration directory from docker host (/var/conf.d)
+
+To reload nginx gracefully
+`nginx -s reload` -s if for signal
+To send a signal to reload nginx gracefully in docker
+`docker kill -s HUP <container_name>` HUP - Restart Now Signal
+
+__Syntax:__
+
+- Nginx can operate in Layer 7 (HTTP) or Layer 4 (TCP/UDP)
+- Using `stream` context it becomes layer 4
+- Using `http` context it becomes layer 7
+
+```nginx
+worker_processes 2; # directive in global context
+
+http {              # http context
+    gzip on;        # directive in http context
+
+  server {          # server context
+    listen 80;      # directive in server context
+  }
+}
+```
+> **Listen directive:** If not present, it means `*:80` is used; meaning all ips on port 80
+
+
+	
 
 
 ## AWS Refresher
@@ -138,5 +182,5 @@ Instance profile and role
 ## GIT gyan
 
 - We have the option in GitLab UI to restrict branch name via regex
-	- repo -> settings -> repository -> push rules
+  - repo -> settings -> repository -> push rules
 
