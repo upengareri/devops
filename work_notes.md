@@ -77,10 +77,10 @@ Devops nice articles - https://dvops.cloud/
 
 ### SSH Protocol
 
-| Client        | Server      |
-| ------------- |-------------|
-|id_rsa         |             |
-|id_rsa.pub       ------(copy)------> |~/.ssh/authorized_keys |
+| Client        | Server                              |
+| ------------- |------------------------------------ |
+|id_rsa         |                                     |
+|id_rsa.pub     | --(copy)--> |~/.ssh/authorized_keys |
 
 The above diagram shows that we create ssh public and private key pair using `ssh-keygen` (rsa or more recent ecdsa encryption algo type) and then copy the public part to the servers `authorized_keys` file by sshing/logging in to the server.
 
