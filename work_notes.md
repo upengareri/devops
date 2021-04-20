@@ -186,3 +186,9 @@ Instance profile and role
 
 -----
 
+
+## Docker
+
+1. To inspect volumes mounted on a container
+
+`docker inspect -f '{{ json .Mounts }}' containerid | jq `
