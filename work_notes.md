@@ -201,3 +201,18 @@ Instance profile and role
 ## 2. [Port Forwarding](./blogs/port_forwarding.md)
 
 ## 3. [Confluence import failure](https://confluence.atlassian.com/confkb/after-a-failed-space-import-it-s-not-possible-to-re-import-because-of-leftover-space-data-217743668.html)
+
+
+# Useful Links:
+
+### [Devops pre-requisite](https://www.youtube.com/watch?v=Wvf0mBNGjXY&list=LL&index=2&t=643s)
+- Just enough info to get you started about -
+	- Linux basic commands
+	- Vim
+	- Linux package management
+	- Linux services (systemctl/service)
+	- Virtual Box and Vagrant
+	- Networking
+		- DNS
+		- Switching and Routing
+		- IP Address, Port, Local host
