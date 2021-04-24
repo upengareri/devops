@@ -192,3 +192,12 @@ Instance profile and role
 1. To inspect volumes mounted on a container
 
 `docker inspect -f '{{ json .Mounts }}' containerid | jq `
+
+
+# Blogs/Scenarios
+
+
+## 1. [RDP to Windows EC2 without a bastion host or public subnet](./blogs/rdp_to_ec2.md)
+## 2. [Port Forwarding](./blogs/port_forwarding.md)
+
+## 3. [Confluence import failure](https://confluence.atlassian.com/confkb/after-a-failed-space-import-it-s-not-possible-to-re-import-because-of-leftover-space-data-217743668.html)
