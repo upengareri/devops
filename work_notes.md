@@ -194,6 +194,15 @@ Instance profile and role
 `docker inspect -f '{{ json .Mounts }}' containerid | jq `
 
 
+-----
+
+## Random
+
+- __Terraform__: any variables that will differ between environments should be exposed as input variables
+
+
+-----
+
 # Blogs/Scenarios
 
 
@@ -216,3 +225,9 @@ Instance profile and role
 		- DNS
 		- Switching and Routing
 		- IP Address, Port, Local host
+
+### [Terragrunt Quick Start](https://terragrunt.gruntwork.io/docs/getting-started/quick-start/#keep-your-provider-configuration-dry)
+- Major benefits -
+	- Keep Backend state DRY
+	- Keep Provider DRY
+	- Keep CLI DRY
