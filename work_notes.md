@@ -193,6 +193,17 @@ Instance profile and role
 
 `docker inspect -f '{{ json .Mounts }}' containerid | jq `
 
+Notes on docker:
+- running on the __daemon__ means running on the background. For e.g nginx when installed runs with `daemon on` i.e in the background
+- docker likes to keep track of or monitor the apps running in the foreground and that is why when we use `docker ps` we see the running containers
+- if you run an app that runs itself in background (daemon on) the docker loses track of it and quits. So when you run `docker ps` for those cases you'll find no container running
+- 
+
+-----
+
+## BASH
+
+- `ps aux`: tells you the processes running
 
 -----
 
@@ -223,6 +234,9 @@ Instance profile and role
 	- Virtual Box and Vagrant
 	- Networking
 		- DNS
+		 - /etc/host
+		 - resolver
+		 - DNS Server
 		- Switching and Routing
 		- IP Address, Port, Local host
 
@@ -231,3 +245,4 @@ Instance profile and role
 	- Keep Backend state DRY
 	- Keep Provider DRY
 	- Keep CLI DRY
+	- Keep use of modules DRY
