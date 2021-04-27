@@ -118,6 +118,7 @@ Now what happens when we perform the ssh - `ssh -i /path/to/private_key` bob@ser
   - https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-18-04
   - https://www.netguru.com/codestories/nginx-tutorial-basics-concepts
   - https://www.youtube.com/watch?v=D5grhfkjjXE
+  - http://sawers.com/blog/reverse-proxying-with-nginx/
 
 
 __File Configurations (in yum/apt base installations):__
@@ -196,10 +197,11 @@ Instance profile and role
 
 -----
 
-## Random
+## Random notes
 
 - __Terraform__: any variables that will differ between environments should be exposed as input variables
-
+- __Shell__: `sudo chown -R username:group directory` to recursively change ownership of a directory
+- __Manage multiple terraform versions__: `tfenv` and `tgenv` (https://blog.gruntwork.io/how-to-manage-multiple-versions-of-terragrunt-and-terraform-as-a-team-in-your-iac-project-da5b59209f2d#6d29)
 
 -----
 
