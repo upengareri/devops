@@ -298,6 +298,140 @@ Utility tool to copy files/directories to remote server using ssh. As long as yo
     2. Chain OUTPUT (Outbound)
     3. Chain FORWARD (to forward traffic to another server (like reverse proxy), hardly used)
 
-- ![iptables inbound rule](./images/iptables_inbound_rule.png)
+    ![iptables inbound rule](./images/iptables_inbound_rule.png)
 
 > In the above image "Client B" can access remote server because there is no deny rule in iptables. By default it allows all to connect (IMPLICIT ALLOW).
+
+- `iptables -A INPUT -p tcp --dport 22 -j DROP` denies access to port from anywhere (source not provided means "all" by default); this will solve our problem in above image of clientB being able to connect which was a breach for us
+
+> The sequence in which rules are applied in IPTABLES are very important because that's how they are applied 
+
+- That said, if you have already put some rule in iptables and now you want to add a rule at the top then you can use `-I` option instead of `-A`. That way you can put the rule at the top instead of bottom.
+- `iptables -D OUTPUT 5` delete 5th rule from OUTPUT chain table
+
+### empheral port
+![ephemeral port](./images/ephemeral_port.png)
+Looking at the above picture, when you make a request to db server on port 5432 from app server, then the db server might send you the query result at some port. If db sends the response to app server at port say 44060 then that would be an ephemeral port. Ephemeral port ranges b/w 32768-60999. What it means is that those port ranges are not static and thus next query response from db to app server might be on a different port and not necessarily 44060.
+-----
+## CRONJOBS
+- `crontab -e` opens crobjob file where you can put __time and command__
+- `crontab -l` list all created cronjobs
+- `tail /var/log/sys.log` stores all the cron jobs that were run successfully
+    ![cron schedule](./images/cron_schedule.png)
+-----
+## DNS
+- Whenever you type `ping db`, or `ssh db` or `curl http://www.google.com`, system looks at `/etc/hosts` for the ip correspong to the hostname.
+- Translating hostname to IP address this way is called __NAME RESOLUTION__
+- `ping`, `nslookup` and `dig` are some of the commands to test dns resolution. It might also be the case that in some system `ping` is disabled
+- Back in the earlier days, we had small network and thus managing __name resolution__ in `/etc/hosts` was feasible. But with bigger networks in current days, it is hard to manage in a single file and also if ip for any host changes then we need to change in every hosts `/etc/hosts` file
+![hosts](./images/etc_hosts.png)
+- To solve this, we use centralised server called __DNS Server__ to manage __name resolution__. Every hosts points to this server
+- `/etc/resolv.conf` every host has this dns resolution configuration file that specifies the address of the dns server
+- every time the host comes across a hostname that it does not know about, it looks it up from the dns server specified in `/etc/resolv.conf`
+- now that doesn't mean you can't have entry in your `/etc/hosts` file. For e.g to test your test server or local server, you can put its name resolution in `/etc/hosts` file
+- by default, the host first looks at the `/etc/hosts` file and then to __dns nameserver__
+- `/etc/nsswitch.conf` this file determines the above order i.e to look at files (`/etc/hosts`) first and then to __nameserver__. Example below - 
+```bash
+[~]$ cat /etc/nsswitch.conf
+...
+hosts:      files dns
+...
+```
+- you can change the order by modifying this file
+- what if you want to ping server that is not hosted on your DNS server e.g `ping www.facebook.com`
+- in that case you can add another nameserver that knows about that host/server
+- one such example of publicly hosted nameserver is `8.8.8.8` managed by google. Example below -
+```bash
+[~]$ cat /etc/resolv.conf
+nameserver      192.168.1.100
+nameserver      8.8.8.8
+```
+here 192.168.1.100 is an example of our self-hosted dns server to resolve our local dns name resolution and 8.8.8.8 to resolve public dns name resolutions
+- but again this way we'll have to maintain nameservers locally
+- So, another solution is to forward all unknown hostnames to 8.8.8.8 by making an entry in our own hosted dns server. Example below -
+
+    ![dns server](./images/dns_server.png)
+
+- In your organization dns server, you might have a lot of sub-domains like wiki.mycompany.com, git.mycompany.com, jira.mycompany.com etc. If you don't want to type mycompany.com everytime for your internal company services, you can use `search` in `/etc/resolv.conf` to search for domain. Example -
+```bash
+[~]$ cat /etc/resolv.conf
+nameserver      192.168.1.100
+search          mycompany.com     prod.mycompany.com
+```
+-----
+### Record Types
+- determines how the records are stored in dns server
+- Some of the many record types -
+1. A record: storing IPv4 to hostname
+2. AAAA record (quad A): storing IPv6 to hostname
+3. CNAME record: storing one name to another (like an alias)
+-----
+### Tools to test dns name resolution
+`ping www.google.com` checks `/etc/hosts` first to resolve
+`nslookup www.google.com` query hostname from dns server; it doesn't check `/etc/hosts`
+`dig www.google.com` returns more detailed info in the similar form as is stored in dns server
+-----
+## NETWORK BASICS
+- If network is a room then gateway is the door. We can take the analogy of family in a house as network. If "Khan" family has to reach each other then they don't need a gateway which means "0.0.0.0" entry in the gateway field. But if "Khan" family has to reach "Kapoor" family then they need to know the door of the gateway through which they can go out and talk to "Khan" family.
+- "Khan" family has lot of friends and thus they need route table to remember other families and the gateway/door to reach them
+- As discussed above, to talk among their own family members they don't need any gateway, hence "0.0.0.0" in the gateway entry field of the table
+- `route` to see the table
+- `ip route add <network_you_want_to_reach> via <gateway>` add entry to route table
+    ![default gateway](./images/default_gateway.png)
+- In the above image, we have two route tables, one for internal network and the other for internet
+- Destination set as "default" (also means "0.0.0.0") means if the router can't resolve the ip or network then it will use the specified gateway to try to reach that network e.g to reach google etc.
+
+### Key commands for network troubleshooting
+- `ip link` list network interfaces on the host and their status
+- `ip link set dev eth0 up` to set the status of network interface named eth0 to UP
+- `ip addr` or `ip a` or `ifconfig` to see the ip addresses assigned to those interfaces
+- `ip addr add 192.168.1.10/24 dev eth0` used to add ip address to the interface
+- `/etc/network/interfaces` to persist the above `ip addr add` change after restart
+- `ip route` or `route` to see the route table
+- `ip route add 192.168.1.0/24 via 192.168.2.1` used to add entry to route table e.g `ip r add default via 192.168.2.1` will add default route via 192.168.2.1
+- `telnet <host/ip_address> <port>` protocol similar to ssh to connect to remote server; ssh is more secure than telnet protocol e.g `telnet devapp-01 80` to connect to host devapp-01 via http
+
+### Network troubleshoot scenario
+- Bob is trying to connect to a repository server URL "http://caleston-repo-01" but getting connection timeout error
+    ![network troubleshoot 1](./images/network_troubleshoot_1.png)
+- This could be because of variety of reasons
+    ![network troubleshoot 2](./images/network_troubleshoot_2.png)
+- Let's go through the standard network troubleshoot techniques (POST-MORTEM):
+    1. __CHECK INTERFACES..__
+        - check host ip connectivity to ensure the primary interface is __UP__
+        - `ip link`
+    2. __CHECK DNS RESOLUTION...__
+        - check if we can resolve the ip address to the hostname
+        ```bash
+        [~]$ nslookup caleston-repo-01
+        Server:         192.168.1.100
+        Address:        192.168.1.100 #53
+
+        Non-authoritative answer:
+        Name:   caleston-repo-01
+        Address: 192.168.2.5
+        ```
+        > This tells us that nslookup command is able to reach out to the DNS server which has IP __"192.168.1.100"__ and requests for the ip address of the hostname __"caleston-repo-01"__ which returns __"192.168.2.5"__
+
+    3. __CHECK CONNECTIVITY...__
+        - `ping caleston-repo-01`
+        - ping is often not a best tool to check connectivity as many networks would have disabled it however it's worth a try
+    4. __CHECK ROUTE...__
+        - to troubleshoot an issue with the route we run `traceroute` to see the number of hops/routes between the soure (our laptop) and the repo server
+        - it will also show us if there is any problem in any of the device in the network route between source and destination   
+        - `traceroute  192.168.2.5`
+            ![network troubleshoot 3](./images/network_troubleshoot_3.png)
+        - from the output we see that there are 2 routers and the connection to them is okay
+        - however the request timeout out b/w the 2nd router and the server
+        - looking at the repo server will give us the idea where the issue could be
+    5. __CHECK SERVICES...__
+        - see if the http service is running at port 80
+        - netstat command (short for __network status__) can be used to get info about the network and protocol statistics (which ports are open)
+        ```bash
+        [caleston-repo-01: ~]$ netstat -an | grep 80 | grep -i LISTEN
+        tcp6    0       0 :::80         :::*            LISTEN
+        ```
+        - In this case the command flag shows the active ports in the system and we are lookign specifically if port 80 is listening on the server
+        - we see that it is listening that means the web server is UP
+    4. __CHECK INTERFACES...__
+        - `ip link`
