@@ -211,8 +211,8 @@ Some explanation about the above image:
     - User account contains follwing info about the user:
         - username, uid, gid, home directory, default shell
     - while creating the user, if no group is specified, it is assigned the same gid and group name as the uid and username. That group becomes its primary group. A user can be part of multiple groups
-    - `id michael` to get info about the user michael
-    - `grep -i michael /etc/passwd` to get detailed user account info about michael
+    - __`id michael` to get info about the user michael__
+    - __`grep -i michael /etc/passwd` to get detailed user account info about michael__
 
 ### Commands to see details about the user (stalk users)
 - `id` gives info about the current user (uid, gid and the groups it belongs to)
@@ -287,6 +287,7 @@ To perform password-less ssh to remote server we need to copy our public ssh key
 Utility tool to copy files/directories to remote server using ssh. As long as you have remote access to server via ssh you can use this command.
 - `scp /home/bob/test.tar.gz devapp1:/home/bob` copy the zip file to home directory of remote server devapp1
 - `scp -pr /home/bob/media/ devapp1:/home/bob` r: directory; p: preserve ownership and permission
+- `chown -R user:group <folder>` to change ownership of <folder> recursively
 -----
 ## IPTABLES
 - To filter network traffic (IP + Port)
@@ -435,3 +436,91 @@ search          mycompany.com     prod.mycompany.com
         - we see that it is listening that means the web server is UP
     4. __CHECK INTERFACES...__
         - `ip link`
+-----
+
+## STORAGE
+### BLOCK DEVICES
+- It is a type of file-system located under `/dev`
+- hdd(traditional hard-disk drive) and ssd are examples
+- data is stored/written in blocks or chunk of space as opposed to character devices
+- `lsblk` to see list of block devices
+    ![blk](./images/block_device.png)
+- In the above image you can notice the major version which represents the type of device; here 8 means **S**CSI **D**isk and hence the device name starts with __sd__
+- The entire disk can be broken down into smaller segments called __PARTITION__
+- For e.g in the above image, sda1 mounted at /boot/efi is for bootloaders of OS, sda2 mounted at /media/MM/Data for storing backups and sda3 mounted at / for root partition
+- The info about the partition is stored in __PARTITION TABLE__ which we can view by tools such as `lsblk` or `fdisk` e.g `sudo fdisk -l /dev/sda`
+### PARTITION
+- It is recommended to create partitions for your disk and before doing that let's discuss different types of partions and schemes used to create those partitions
+- Partition Types:
+    1. Primary
+    2. Extended 
+    3. Logical
+- Partiton Schemes:
+    1. MBR (Master Boot Record)
+    2. GPT (GUID Partition Table)
+- Back in earlier days (30 years ago) computers came with MBR partition scheme. In this scheme, you could create only 4 primary partitions. If you want to make more than 4, you would create 3 primary + 1 extended. Extended partition has partition table that points to 1 or more logical partitions. Logical partitions are created within extended partitions
+    ![partition types](./images/partition_types.png)
+- So now we know with MBR we can only have 4 primary partitions. The second limitation of MBR is that it can support __MAX 2TB__ of disk size
+- GPT is a more recent partition scheme that was created to address the limitations of MBR
+- Theoretically you can create unlimited number of primary partitions with it but is normally limited by the OS you use. For e.g RHEL only allows 128 partitions per disk. Secondly 2TB disk size limitation is not there in GPT
+- If the above explanation is not clear then please look at this 5 minutes reference: https://www.howtogeek.com/184659/beginner-geek-hard-disk-partitions-explained/
+- To create a partion of type __gpt__ one can use the wrapper version of `fdisk` called `gdisk`
+
+__Summary of Block Device and Partition__
+> So if you see __sd__ prefix then the block device type is __SCSI DISK__ and if you see __gpt__ then the partition scheme for that device is __GUID Partition Table__
+
+### FILE SYSTEM
+- Creating partition from disk doesn't make it usable to OS
+- To write to a disk or partition, we must __create filesystem and mount it to a directory__
+- Filesystem defines how data is stored on a disk
+- Some of the filesystem types in linux:
+    - ext2: can store 2TB file siz, long crash recovery time is the drawback
+    - ext3: stores 2TB file size, speedy crash recovery
+    - ext4: stores 16TB file size, further improves ext3
+- `sudo blkid /dev/<disk>` to check the filesystem for the <disk>
+-----
+## SYSTEMD
+- To run any program in the background, we need to define it as a __service__
+- For that we need to create a service file under `/etc/systemd/system/<example>.service`
+- The __.service__ file is called __UNIT__ file or __CONFIGURATION__ file
+- `systemctl start <service>` starts the service
+- `systemctl status <service>` shows the status of the service e.g if it's running or stopped
+- `systemctl stop <service>` stops the service
+- Below is an example of a simple application service - 
+    ![simple service](./images/systemd_example_1.png)
+- Let's say you have a requirement for an application service that should run on every bootup, should start only after db service is on, should self restart on failure and log events for future analysis
+    ![complex service](./images/systemd_example_2.png)
+
+> Here, [] is called __section__, keywords in orange color e.g ExecStart are called __derivatives__. With `systemd` services logs are automatically handled/generated
+
+> Note: USER=project_mercury is the service account that will be used here to start this service instead of root
+
+### SYSTEMD TOOLS (systemctl and journalctl)
+
+1. __systemctl__ (to manage services)
+
+-------------------------related to particular service-------------------------
+- `systemctl start docker` to start docker service
+- `systemctl stop docker` to stop docker service
+- `systemctl restart docker` will bring down the service and then will bring up
+- `systemctl reload docker` to reload the service without interrupting normal functionality
+- `systemctl enable docker` to enable the service and make it persistent across reboot
+- `systemctl disable docker` to disable service at boot
+- `systemctl status docker` to show the status of service running
+    - ACTIVE: service running
+    - INACTIVE: service stopped
+    - FAILED: crashed, error, timeout etc. (if the command run by service itself fails)
+- `systemctl daemon-reload` must be run to reload changed unit files (to make systemd aware of the new changes)
+- `systemctl edit <example>.service --full` to make changes to the unit file without reloading the daemon after the changes are saved
+-------------------------related to systemd information-------------------------
+- `systemctl get-default` to see the current run level for the target
+- `systemctl set-default multi-user.target` to set a differnt target e.g multi-user.target
+- `systemctl list-units --all` to list all the units systemd has loaded or attempted to load (loads all active, inactive, failed)
+- `systemctl list-units` to list only the active units
+-----
+2. __journalctl__ (to view log messages for services)
+- `journalctl` show all log entries from oldest to newest
+- `journalctl -b` show log entries for current boot
+- __`journalctl -u UNIT` to show log entries for particular unit e.g `journalctl -u docker.service` (great for debugging issues related to service)__
+
+> Cheatsheet on systemd commands: https://access.redhat.com/sites/default/files/attachments/12052018_systemd_6.pdf
