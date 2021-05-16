@@ -11,7 +11,7 @@
 ## Environment variable
 - `echo $SHELL` prints value of shell (which is an environment variable)
 - `env` lists all environment variables
-- `export NAME=VALUE` creates
+- `export NAME=VALUE` creates env var 
 - `.profile` or `.pam_environment` to persist environment variable from logout/reboot
 -----
 ## Path variable
@@ -369,8 +369,11 @@ search          mycompany.com     prod.mycompany.com
 -----
 ### Tools to test dns name resolution
 `ping www.google.com` checks `/etc/hosts` first to resolve
+
 `nslookup www.google.com` query hostname from dns server; it doesn't check `/etc/hosts`
+
 `dig www.google.com` returns more detailed info in the similar form as is stored in dns server
+
 -----
 ## NETWORK BASICS
 - If network is a room then gateway is the door. We can take the analogy of family in a house as network. If "Khan" family has to reach each other then they don't need a gateway which means "0.0.0.0" entry in the gateway field. But if "Khan" family has to reach "Kapoor" family then they need to know the door of the gateway through which they can go out and talk to "Khan" family.
@@ -512,6 +515,7 @@ __Summary of Block Device and Partition__
     - FAILED: crashed, error, timeout etc. (if the command run by service itself fails)
 - `systemctl daemon-reload` must be run to reload changed unit files (to make systemd aware of the new changes)
 - `systemctl edit <example>.service --full` to make changes to the unit file without reloading the daemon after the changes are saved
+
 -------------------------related to systemd information-------------------------
 - `systemctl get-default` to see the current run level for the target
 - `systemctl set-default multi-user.target` to set a differnt target e.g multi-user.target
