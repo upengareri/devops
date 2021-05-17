@@ -118,10 +118,29 @@ fi
 - `[ -s file ]` if file exists and has size greater than 0
 - `[ -x file ]` if file is executable
 - `[ -w file ]` if file is writeable
+-----
+## Loops
+### For loop
+![loops](./images/loop.png)
 
+> Here `{0..100}` is both inclusive
+
+![loops use case](./images/loops_use_case.png)
+
+### While loop
+e.g
+```bash
+rocket_status=...
+while [ $rocket_status = "launching" ]
+do
+    sleep 2
+    rocket_status=...
+done
+```
 -----
 ## Best Practices
 - Script should not be require to be edited before running
 - Use command line arguments to pass inputs
+- Don't use backticks i.e `` to execute a command instead use read friendly $()
 
 > `$()` vs `$(())` vs `[[  ]]`
