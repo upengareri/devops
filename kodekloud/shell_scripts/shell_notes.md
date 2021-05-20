@@ -123,12 +123,17 @@ fi
 ### For loop
 ![loops](./images/loop.png)
 
-> Here `{0..100}` is both inclusive
+> Here `{0..100}` is both inclusive and works on bash but not on bourne shell i.e 'sh'. But in most systems 'sh' points to 'bash'. To verify: `ls -l /bin/sh`; it will most likely point to `/bin/bash`
 
 ![loops use case](./images/loops_use_case.png)
 
 ### While loop
-e.g
+- Use while loop when you have to:
+    1. execute command until a specific condition is met
+    2. infinite loop
+    3. menu driven programs
+
+e.g of (1)
 ```bash
 rocket_status=...
 while [ $rocket_status = "launching" ]
@@ -137,10 +142,96 @@ do
     rocket_status=...
 done
 ```
+e.g of (2) and (3)
+```bash
+while true
+do
+    echo "1. Shutdown"
+    echo "2. Restart"
+    echo "3. Exit menu"
+    read -p "Enter a choice: " choice
+    if [ $choice eq 1 ]
+    then
+        shutdown now
+    elif [ $choice eq 2 ]
+    then
+        shutdown -r now
+    elif [ $choice eq 3 ]
+    then
+        break
+    else
+        continue
+    fi
+done
+```
+-----
+## Case statement
+- It is better than a lot of `if-elif` (more than 3)
+- e.g of converting the above menu-driven script 
+
+```bash
+while true
+do
+    echo "1. Shutdown"
+    echo "2. Restart"
+    echo "3. Exit menu"
+    read -p "Enter a choice: " choice
+    
+    case $choice in
+        1) shutdown now  # in case of multiple commands use multiple lines
+           ;;
+        2) shutdown -r now
+           ;;
+        3) break
+           ;;
+        *) continue
+           ;;
+    esac
+done
+```
+> Note the `)` after the choice options. Similarly a good practice is to put `;;` in the new line. `*` is similar to else condition.
+-----
+## Shebang
+- Some syntax such as `{0..100}` is not supported by shells such as bourne shell or dash shell
+- One option is to tell the users of your script to run using bash i.e `bash <your_script>`
+- The best option is to use shebang to set the interpreter for the script to, for e.g, bash
+- __This way even if the script is run by unsupported shells, it uses what is set by shebang e.g `#!/bin/bash`__
+-----
+## Exit codes
+- `echo $?` to show the exit code of the last run command
+- It's always a good idea to indicate the status of your script to the caller/user of the script
+- 0 exit status means success; >0 exit status code is for failure
+- `0` is the default exit code set by shell
+- `exit <number>` to set exit code in a script
+-----
+## Function
+- `return` keywork in function is not the same as in other programming language. Here we use return to mostly return the exit code from within a function
+- But what if we need to return some value from a function
+    1. either use `echo`
+    2. or `return` which can only return numbers
+e.g
+```bash
+function add(){
+    echo $(( $1 + $2 ))  # use it as stdout
+}
+sum=$(add 1 2)
+```
+```bash
+function add(){
+    return $(( $1 + $2 ))  # use it as an exit code; only returns number and not text
+}
+add 1 2
+sum=$?
+```
 -----
 ## Best Practices
 - Script should not be require to be edited before running
 - Use command line arguments to pass inputs
 - Don't use backticks i.e `` to execute a command instead use read friendly $()
+- `;;` use double semi-colons in the new line in `case` statements
+- Always start with a __shebang__ at the top of your script
+- Always return appropriate exit codes in your script
+- Use `shellcheck <script_name>` tool (needs installation) for linting if you're using vi or install plugin 'shellcheck' in vscode if you using IDE
+- Use google shell style guide while writing the script - https://google.github.io/styleguide/shellguide.html
 
 > `$()` vs `$(())` vs `[[  ]]`
