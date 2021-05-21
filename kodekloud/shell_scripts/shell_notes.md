@@ -223,6 +223,7 @@ function add(){
 add 1 2
 sum=$?
 ```
+> Consider functions as mini scripts
 -----
 ## Best Practices
 - Script should not be require to be edited before running
@@ -235,3 +236,7 @@ sum=$?
 - Use google shell style guide while writing the script - https://google.github.io/styleguide/shellguide.html
 
 > `$()` vs `$(())` vs `[[  ]]`
+
+-----
+EXTRA:
+- COLORED OUTPUT: https://misc.flogisoft.com/bash/tip_colors_and_formatting 

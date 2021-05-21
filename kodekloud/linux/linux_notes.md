@@ -513,6 +513,7 @@ __Summary of Block Device and Partition__
     - ACTIVE: service running
     - INACTIVE: service stopped
     - FAILED: crashed, error, timeout etc. (if the command run by service itself fails)
+- `systemctl is-active <service_name>` to check if service is active or not
 - `systemctl daemon-reload` must be run to reload changed unit files (to make systemd aware of the new changes)
 - `systemctl edit <example>.service --full` to make changes to the unit file without reloading the daemon after the changes are saved
 
