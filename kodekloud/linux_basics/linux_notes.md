@@ -529,3 +529,9 @@ __Summary of Block Device and Partition__
 - __`journalctl -u UNIT` to show log entries for particular unit e.g `journalctl -u docker.service` (great for debugging issues related to service)__
 
 > Cheatsheet on systemd commands: https://access.redhat.com/sites/default/files/attachments/12052018_systemd_6.pdf
+
+-----
+## Extra
+`cat /etc/*release*` to view OS specific details like OS name, version etc.
+
+Detailed course on Linux by Linux Foundation: https://training.linuxfoundation.org/training/introduction-to-linux/
