@@ -126,3 +126,47 @@ __Docker Versions__
 __Support of Networks in Version 2 and above__
     - If we want to make use of separate n/w instead of the default bridged n/w created by docker compose, we can use v2 to connect the containers to those custom networks as desired
     ![v2 network](./images/docker_compose_network.png)
+
+-----
+## Docker Engine
+- has 3 components
+    1. docker cli (the commands that we use)
+    2. rest api (used to interact with daemon; cli uses rest api too)
+    3. docker daemon (background process to manage containers, images, volumes and networks)
+- It is not necessary to have docker cli on the same OS as the docker daemon
+    ![docker engine](./images/docker_engine.png)
+
+__CGROUPS__ (control groups)
+- There is no limit to the amount of cpu and memory a docker container can use of the underlying host machine. However, we can limit the amount using below commands:
+- `docker run --cpus=.5 ubuntu` use 50% of the cpu at max for this container
+- `docker run --memory=100m ubuntu` use 100mb of memory only
+    ![docker cgroup](./images/docker_cgroup.png)
+## Docker Storage
+- docker creates the below filesystem when installed on host
+- `/var/lib/docker/`
+    - `/aufs`
+    - `/containers`
+    - `/image`
+    - `/volumes`
+    - etc...
+- To understand the storage, let's recap the layered architecture that the docker uses
+    ![layered architecture](./images/layered_architecture.png)
+- When we build an image, the layers are created as __READ ONLY__ and can only be changes by re-building the image again
+- When we run a container, docker creates another layer called __CONTAINER LAYER__ which is __READ WRITE__ on top of the __IMAGES LAYERS__. This layer is used for storing temporary files, logs and any file created by the user within the container running. This layer exists as long as the container exists.
+
+    ![container layer](./images/container_layer.png)
+    > Remember the same image layer is shared by all the container layers using the image
+
+- In order to persist the data e.g of the container layer, we can create a volume and mount it to the container
+    - `docker create volume <vol_name>` e.g `docker create voluem data_volume` this'll create volume under /var/lib/docker/volumes/data_volume
+    - `docker run -v data_volume:/var/lib/mysql mysql` this will mount the volume we created to the volume inside the container
+    - What if we don't create the volume before mounting it to the container. In that case docker will automatically create the volume for us
+    - This way of creating the volumes is stored under `/var/lib/docker/volumes/`
+    - What if we want to mount volume that is somewhere else in our host filesystem and not in the default /var/lib/docker/volumes filesystem
+    - In that case we'll run the container with `-v` but will provide the complete path of the folder we would like to mount e.g `docker run /data/mysql:/var/lib/mysql mysql`. This is called __BIND MOUNTING__
+    - So, there are 2 types of mount
+        1. __Volume mount__: mounts from the volumes directory
+        2. __Bind mount__: mounts from any location on the docker host
+    - Using `-v` is an old style, the `--mount` is the preferred way as it is more verbose and we have to specif each parameter in a key-value pair e.g `docker run --mount type=bind,source=/data/mysql,target=/var/lib/mysql mysql`
+    ![docker mounts](./images/docker_mounts.png)
+    > Remember the image for better understanding of how docker uses image layer, container layer and does volume/bind mount
