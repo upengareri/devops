@@ -170,3 +170,29 @@ __CGROUPS__ (control groups)
     - Using `-v` is an old style, the `--mount` is the preferred way as it is more verbose and we have to specif each parameter in a key-value pair e.g `docker run --mount type=bind,source=/data/mysql,target=/var/lib/mysql mysql`
     ![docker mounts](./images/docker_mounts.png)
     > Remember the image for better understanding of how docker uses image layer, container layer and does volume/bind mount
+
+-----
+## Docker Networks
+- Docker creates 3 networks automatically
+    1. __Bridge__: private internal default n/w (usually in the range 172.16.) in which all the containers can communicate to each other and have interal ip address. To access any containers from outside world, map the ports to the docker host
+    2. __Host__: another way to access the container externally; this takes out any isolation b/w docker host and docker container meaning if for e.g you host web server on port 5000 of docker then it gets attached to host port and thus we do not need to do port mapping. This also means that we can't run multiple containers as the port is already occupied
+    3. __None__: containers are isolated and not attached to any n/w; no access to outside and other containers
+![docker_network](./images/docker_network.png)
+
+- We can also create our own custom n/w
+![docker_custom_network](./images/docker_custom_network.png)
+- `docker run --network=custom-isolated-network ...` to attach custom n/w to the container
+- `docker network inspect bridge` to inspect bridge n/w
+- `docker network inspect <n/w name>` to inspect custom n/w created
+> We can use `--link` flag to link containers to the custom n/w
+-----
+## Docker Registry
+- It's a place to keep docker images
+- When we do `docker pull nginx` docker by default pulls from `docker.io/nginx/nginx`
+![docker_registry](./images/docker_registry.png)
+- Here docker.io is the docker public registry. Similary we can have private registry provided by clould providers such as aws (ecr), azure, gcp etc.
+![docker_private_registry](./images/docker_private_registry.png)
+- We need to login before pushing and pulling to private registry and use registry name as part of the image to be pulled or pushed
+- We can also deploy our own custom registry as docker provides it as docker application by the image name registry
+-----
+## Container Orchestration
