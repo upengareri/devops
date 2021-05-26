@@ -96,6 +96,7 @@ CMD ["5"]
 -----
 ## Docker Compose
 - It's an easier way of running, configuring and maintaining various container apps  on a single docker host
+
 __Run - Links__ (`--links` flag)
 - to link two containers together
 - it has been deprecated as there is better way to do it with docker swarm and networking but good to know this to build the basics
@@ -196,3 +197,9 @@ __CGROUPS__ (control groups)
 - We can also deploy our own custom registry as docker provides it as docker application by the image name registry
 -----
 ## Container Orchestration
+- Typically consists of mulitple hosts that contains multiple containers
+- We can create hundreds of containerized apps with a single command
+- Some container orchestration solutions -
+    - docker swarm by docker
+    - kubernetes by google
+    - mesos by apache
