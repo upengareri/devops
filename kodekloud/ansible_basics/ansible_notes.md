@@ -1,7 +1,7 @@
 # Ansible Basics
 - Check additional notes on ansible here as well - [../../work_notes](../../work_notes.md)
 
-## Inventory
+## <a id="inventory"></a> Inventory
 - In order to work with multiple servers, ansible needs to make connectivity to those servers. It is done using __ssh on linux__ and __powershell remoting on windows__
 - That's what makes ansible agentless - no need to install software on target machines to work with ansible
 - Info about the hosts are stored in inventory file. We can create our own custom inventory file
@@ -45,7 +45,7 @@
     - default port is 22 for ssh and 5986 for winrm
     - obviously storing password in inventory is not a good option in production environment so we can have ssh passwordless connection or more about it is discussed in ansible vault topic
 ------
-## Playbooks
+## <a id="playbooks"></a> Playbooks
 - It's ansible's orchestration language where we define what ansible should do
 ![playbook_example](./images/playbook_example.png)
 - Let's take another example of the same playbook file but in a slightly different format
@@ -59,12 +59,12 @@
 - `ansible-playbook <playbook.yml>` to execute a playbook
 - `ansible-playbook --help` for help
 -----
-## Modules
+## <a id="modules"></a> Modules
 - Different actions run by tasks are called modules
 - There are hundreds of modules; common ones - command, script, yum, service
  ![modules_example](./images/modules_example.png)
 -----
-## Variables
+## <a id="variables"></a> Variables
 - Some of the ways we can define variables include
     - Example of variables in inventory file
     ```ansible
@@ -110,7 +110,7 @@
             when: age >= 18
     ```
 -----
-## Conditionals
+## <a id="conditionals"></a> Conditionals
 - Below is an example of conditional where we want to use `apt` module if the host is Debian and `yum` module if it is Redhat
 ```ansible
 ---
@@ -148,7 +148,7 @@
         body: Httpd Service is down
       when: result.stdout.find('down') != -1
 ```
-## Loops
+## <a id="loops"></a>Loops
 ![loops_example](./images/loops_example.png)
 
 The above image shows two ways of creating a loop (items are dictionary)
@@ -174,7 +174,7 @@ Another example of using variables with loops -
             command: "echo \"{{ item }}\""
             with_items: "{{ fruits }}"
 ```
-## Roles
+## <a id="roles"></a>Roles
     
 ![roles_analogy](./images/roles_analogy.png)
     
@@ -186,3 +186,54 @@ Another example of using variables with loops -
     - Organize (roles define set of best practices; see image below)
     ![roles_best_practices](./images/roles_best_practices.png)
     - sharing code to community (e.g ansible galaxy)
+> It is recommended to look at the community first before writing your own role as it might be the case that it is already shared
+
+### Create a role
+![role_init](./images/role_init.png)
+- One e.g for creating your custom role is via `ansible-galaxy init <rolename>` command
+- In the image above when you use role name in the playbook, ansible by default looks into the current project directory and then under `/etc/ansible/roles`
+- The rule for this default behaviour is set under `/etc/ansible/ansible.cfg`
+
+### Use a role
+- Search for role in web UI for use cli option e.g `ansible-galaxy search mysql`
+- `ansible-galaxy install <role name>` to install under default roles directory i.e `/etc/ansible/roles`
+- Roles can be used in 2 ways:
+    1. item form
+    2. dictionary form (cutomizable options)
+    ![how_to_import_roles](./images/how_to_import_roles.png)
+- `ansible-galaxy list` to check the installed roles
+- `ansible-config dump | grep ROLE` to check the default location of installed roles
+- `ansbile-galaxy install <rolename> -p ./roles` to install role on a custom directory
+
+-----
+
+## Advanced Topics
+### Preparing Windows
+- Ansible control machine can only be Linux and not Windows
+- Windows machine can be targets of Ansible and thus be part of automation
+- Ansible connects to Windows machine using `winrm`
+- Requirements for winrm:
+    - `pywinrm` module installed on Ansible control machine - `pip install pywinrm>=0.2.2`
+    - Although anisble is agentless i.e we do not need to install anything on target machine but we do need to configure winrm on windows so that control machine can connect to windows via winrm
+        - the easy way of configuring is via ansible provided script
+            - setup winrm - examples/scripts/ConfigureRemotingForAnsible.ps1
+    - More info on Windows support is provided in the documentation - https://docs.ansible.com/ansible/latest/user_guide/windows.html#windows
+### Dynamic Inventory
+- We normally use `ansible-playbook -i inventory.txt playbook.yml` to run playbook on static inventory here
+- But we can also use script to get inventory information from for e.g aws
+    - `ansible-playbook -i inventory.py playbook.yml`
+- Some of the dynamic inventory scripts are already provided in ansible documentation site
+
+### Custom Modules
+- We can also create our own custom modules using python
+- The module has to be created using a custom format which you can check on ansible doc
+
+-----
+## SUMMARY
+- [Inventory files](#roles)
+- [Playbooks](#playbooks)
+- [Modules](#modules)
+- [Variables](#variables)
+- [Conditionals](#conditionals)
+- [Loops](#loops)
+- [Roles](#roles)
