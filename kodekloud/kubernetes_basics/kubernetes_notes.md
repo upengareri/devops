@@ -43,7 +43,7 @@ Below image shows the main difference (through the components) b/w master and wo
 - `kubectl cluster-info` to view info about the cluster
 - `kubectl get nodes` to list all nodes part of the cluster
 -----
-## Pods
+## <a id="pods"></a>Pods
 - Kubernetes doesn't deploy containers on the worker node; they are wrapped on k8s object called pods
 - Pod is a single instance of an application; it has 1-1 relation with application
 - Below image shows very simple example of 2 pods on a node and if the node can't take the load of so many users accessing the application, new pod on new node is used
@@ -56,7 +56,7 @@ Below image shows the main difference (through the components) b/w master and wo
 - `kubectl describe pod <podname>` detailed description about the pod like its IP, node name, container name, id, its image name, node IP etc.
 
 -----
-## Pod in YAML
+### Pod in YAML
 ![yaml_in_k8s](./images/yaml_in_k8s.png)
 
     - The above image shows an example of how to create a pod using yaml file
@@ -77,7 +77,8 @@ Below image shows the main difference (through the components) b/w master and wo
     ![replication_controller_lb_and_as](./images/replication_controller_lb_and_as.png)
 - Replication controller is deprecated and the new alternative for it is __REPLICA SET__
 
-### Replica Set in YAML
+### <a id="replicaset"></a>Replica Set in YAML
+
 - Below is an examplle of replica set that creates 3 pods
 ```yaml
 apiVersion: apps/v1
@@ -123,12 +124,35 @@ spec:
                                       |--> type      |--> name
 ### Labels and Selectors
 - Labels are used so that selectors can filter pods based on matchLabels as there can be 100s of other pods which we may not want to monitor with replicaset
-### Summary of replicaset commands
+### <a id="replicaset-command"></a>Summary of replicaset commands
 ```bash
     $ kubectl create -f <example_replica.yml>               # create
     $ kubectl get replicaset                                # check
-    $ kubectl replace -f <example_replica.yml               # edit
+    $ kubectl replace -f <example_replica.yml>              # edit
     $ kubectl scale --replicas=6 -f <example_replica.yml>   # edit
+    $ kubectl edit replicaset <replica_object>                # edit in memory; careful that it doesn't propagate changes to existing replicaset
     $ kubectl delete replicaset myapp-replicaset            # delete; also deletes all underlying PODs
 ```
+> Use `rs` instead of `replicaset` to save time in commandline
+
+> If you run into a scenario where you don't have replicaset definition file but just running object of it, then you can export the definition using
+    `kubectl get rs <rs_object> -o yaml > new_replica.yml`
 -----
+## <a id="deployment"></a>Deployment
+- So far we talked about pods which deploy single instance of an application. Each container is encapsulated in such pod. Multiple pods are deployed using replica set
+- And then come kubernetes object that comes higher up in hierarchy and provides us the capabilities to
+    - upgrade underlying instances seamlessly using `rolling updates`
+    - `undo change` (rollback if something went wrong on upgrade), `pause` and `resume` changes (to make all changes together in all instances) as required
+- Everything in k8s deployment object is same as replicaset except the kind value which changes to __"Deployment"__
+- `kubectl create -f <deployment-definition.yml>` to create deployment object
+- `kubectl get deployments` to get deployment object
+- `kubectl get all` to get all objects i.e deployment, replicaset, pods 
+
+
+
+-----
+## SUMMARY
+- [Nodes](#nodes)
+- [Pods](#pods)
+- [ReplicaSet](#replicaset)
+    - [ReplicaSet Command](#replicaset-command)
