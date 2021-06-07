@@ -130,7 +130,7 @@ spec:
     $ kubectl get replicaset                                # check
     $ kubectl replace -f <example_replica.yml>              # edit
     $ kubectl scale --replicas=6 -f <example_replica.yml>   # edit
-    $ kubectl edit replicaset <replica_object>                # edit in memory; careful that it doesn't propagate changes to existing replicaset
+    $ kubectl edit replicaset <replica_object>              # edit in memory; careful that it doesn't propagate changes to existing replicaset
     $ kubectl delete replicaset myapp-replicaset            # delete; also deletes all underlying PODs
 ```
 > Use `rs` instead of `replicaset` to save time in commandline
@@ -138,7 +138,7 @@ spec:
 > If you run into a scenario where you don't have replicaset definition file but just running object of it, then you can export the definition using
     `kubectl get rs <rs_object> -o yaml > new_replica.yml`
 -----
-## <a id="deployment"></a>Deployment
+## <a id="deployment"></a>Deployments
 - So far we talked about pods which deploy single instance of an application. Each container is encapsulated in such pod. Multiple pods are deployed using replica set
 - And then come kubernetes object that comes higher up in hierarchy and provides us the capabilities to
     - upgrade underlying instances seamlessly using `rolling updates`
@@ -146,8 +146,49 @@ spec:
 - Everything in k8s deployment object is same as replicaset except the kind value which changes to __"Deployment"__
 - `kubectl create -f <deployment-definition.yml>` to create deployment object
 - `kubectl get deployments` to get deployment object
-- `kubectl get all` to get all objects i.e deployment, replicaset, pods 
+- `kubectl get all` to get all objects i.e deployment, replicaset, pods
 
+### Deployments - Update and Rollback
+![deployment_strategy](./images/deployment_strategy.png)
+    
+    UPDATE:
+    1. Recreate
+        - first destroy all the instances and then deploy new instances of the application
+        - has the side-effect of application downtime
+
+    2. Rolling Update
+        - we take down the older version and bring up a newer version one by one
+        - application never goes down and the upgrade is seamless
+        - this is the default deployment strategy
+> Run `kubectl describe depoloyments <deployment_object>` to see the deployment strategy used
+
+> Under the hood, in case of rolling update, k8s create another replicaset and start deploying the applications there and at the same time taking down the applications in the old replicaset. This can be seen with `kubectl get rs` which shows old rs with 0 pods and new rs with desired pods
+
+    ROLLBACK
+    - Similarly in case of rollback, k8s restore the previous replicaset and tear down latest rs one by one
+
+### <a id="deployments-command"></a> Deployments Command
+- `kubectl create -f <deployment-definition.yml> --record`  to create deployments object (record flag records the command used when we see `describe command`)
+- `kubectl get deployments`                                 to get the deployments
+- `kubectl apply -f <deployment-definition.yml>`            to update the deployment
+- `kubectl rollout status <deployment_object>`              to see the status of the deployment
+- `kubectl rollout history <deployment_object>`             to see the revision and history of deployment
+- `kubectl rollout undo <deployment_object>`                to rollback deployment operation
+-----
+## Networking
+![k8s_network](./images/k8s_network.png)
+
+    - IP Address assigned to the pod is emphemeral
+    - When k8s is initially configured, we give it a subnet
+![k8s_cluster_network](./images/k8s_cluster_network.png)
+    
+    - K8s wants us to do the networking so that
+        - all containers/pods can communicate to one another without NAT
+        - all nodes can communicate with all containers and vice-versa without NAT
+    - There are a couple of pre-built solutions available that can do that for us like cisco, flannel etc
+![k8s_custom_network](./images/k8s_custom_network.png)
+    
+    - The above image shows cluster with custom newtwork solution 
 
 
 -----
@@ -156,3 +197,5 @@ spec:
 - [Pods](#pods)
 - [ReplicaSet](#replicaset)
     - [ReplicaSet Command](#replicaset-command)
+- [Deployments](#deployment)
+    - [Deployments Command](#deployments-command)
