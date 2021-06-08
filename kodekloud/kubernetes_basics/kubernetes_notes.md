@@ -143,7 +143,7 @@ spec:
 - And then come kubernetes object that comes higher up in hierarchy and provides us the capabilities to
     - upgrade underlying instances seamlessly using `rolling updates`
     - `undo change` (rollback if something went wrong on upgrade), `pause` and `resume` changes (to make all changes together in all instances) as required
-- Everything in k8s deployment object is same as replicaset except the kind value which changes to __"Deployment"__
+- The syntax of deployment object is same as replicaset except the kind value which changes to "Deployment"
 - `kubectl create -f <deployment-definition.yml>` to create deployment object
 - `kubectl get deployments` to get deployment object
 - `kubectl get all` to get all objects i.e deployment, replicaset, pods
@@ -175,7 +175,7 @@ spec:
 - `kubectl rollout history <deployment_object>`             to see the revision and history of deployment
 - `kubectl rollout undo <deployment_object>`                to rollback deployment operation
 -----
-## Networking
+## <a id="networking"></a>>Networking
 ![k8s_network](./images/k8s_network.png)
 
     - IP Address assigned to the pod is emphemeral
@@ -188,7 +188,53 @@ spec:
     - There are a couple of pre-built solutions available that can do that for us like cisco, flannel etc
 ![k8s_custom_network](./images/k8s_custom_network.png)
     
-    - The above image shows cluster with custom newtwork solution 
+    - The above image shows cluster with custom newtwork solution
+-----
+## <a id="services"></a>Services
+![without_service_scenario](./images/without_service_scenario.png)
+
+- Let's consider the scenario in above image that we have developed a web application encapsulated in the pod and deployed in the node.
+- The pod has a separate n/w of its own whereas node has an IP of 192.168.1.2
+- If we have to access the web application from outside the node say from a machine with IP 192.168.1.10, then one way is to ssh to the node and then use curl to access the pod e.g curl http://10.244.0.2
+- But how do we access the application without ssh'ing to the node
+- That is where different types of services come into picture
+- K8s service is an object just like pods, replicaset and deployment whose one of the use case is to listen to a port in the node and forward that request to the pod running the application. This type of service is called __NODEPORT__ service because the service listens to the port in node
+
+### Service Types
+1. NodePort: where the services make internal POD accessible on the port on the NODE
+2. ClusterIP: where the service creates a virtual IP inside the cluster to enable communication b/w different services such as set of frontend servers to a set of backend servers
+3. LoadBalancer: e.g to distribute load across various servers
+
+### 1. <a id="nodeport"></a>NodePort
+![nodeport](./images/nodeport.png)
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+    name: myapp-service
+spec:
+    type: NodePort
+    ports:  # it's a list so that we can connect to mulitple pods in the same or different nodes
+        - targetPort: 80
+          port: 80  # takes value of targetPort if not provided
+          nodePort: 30008  # it should only be b/w 30000-32767
+    selector:  # should match the labels section of the pod definition
+        app: myapp 
+        type: front-end
+```
+- In the nodeport service definition file, targetPort is the only compulsory field. If the value of "port" field is not provided then by default it takes the value of "targetPort". Similarly "nodePort" is given a random value within the emphemeral range "30000-32767"
+- `selector` should contain the pod labels so that service can know which pod we're talking about and thus can link to it. If there are 3 pods then the service will link to all the 3 pods if label matches
+
+- `kubectl create -f <service-definition.yml>` to create service
+- `kubectl get services` to list the services
+
+- If nodeport service is connected to multiple pods then it uses "random" algo to load balance the app
+- If pods are distributed across multiple nodes then service automatically spans across the nodes to laod balance the application
+
+![nodeport_multiple_nodes](./images/nodeport_multiple_nodes.png)
+
+> To summarize nodeport, in any case whether it be single pod on single node or mulitple pods on single node or multiple pods on mulitple nodes, the service is created exactly the same without us having to do anything extra. If the pod is added or deleted the service is automatically updated making it highly adaptive. Once created we don't have to make any further changes.
+-----
 
 
 -----
@@ -199,3 +245,6 @@ spec:
     - [ReplicaSet Command](#replicaset-command)
 - [Deployments](#deployment)
     - [Deployments Command](#deployments-command)
+- [Networking](#networking)
+- [Services](#services)
+    - [NodePort](#nodeport)
