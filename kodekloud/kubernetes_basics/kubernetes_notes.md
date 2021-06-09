@@ -226,15 +226,50 @@ spec:
 - `selector` should contain the pod labels so that service can know which pod we're talking about and thus can link to it. If there are 3 pods then the service will link to all the 3 pods if label matches
 
 - `kubectl create -f <service-definition.yml>` to create service
-- `kubectl get services` to list the services
+- `kubectl get services` to list the services (or `kubectl get svc`)
+
 
 - If nodeport service is connected to multiple pods then it uses "random" algo to load balance the app
-- If pods are distributed across multiple nodes then service automatically spans across the nodes to laod balance the application
+- If pods are distributed across multiple nodes then service automatically spans across the nodes to laod balance the application<a id="nodeport-loadbalance"></a>
 
 ![nodeport_multiple_nodes](./images/nodeport_multiple_nodes.png)
 
 > To summarize nodeport, in any case whether it be single pod on single node or mulitple pods on single node or multiple pods on mulitple nodes, the service is created exactly the same without us having to do anything extra. If the pod is added or deleted the service is automatically updated making it highly adaptive. Once created we don't have to make any further changes.
+
+## 2. <a id="cluster-ip"></a>ClusterIP
+![cluster_ip](./images/cluster_ip.png)
+
+    - The above image shows a typical full stack web application and as shown in the image above pods are assigned IP (which are emphemeral)
+    - Without cluster ip service it is difficult for a pod in frontend to communicate to backend pod as there is a question of which pod to communicate to and also it might not exist in future 
+    - ClusterIP provides a single interface for frontend apps to connect to and the service then takes care of load-balancing to the backend pods. Similary for communication b/w backend and redis in the diagram above
+    - Each ClusterIP service gets a name and IP assigned to it and that is the name that other pods should use for communication
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+    name: backend
+spec:
+    type: ClusterIP  # default name if you don't provide this field
+    ports:
+        - targetPort: 80  # port of pod
+          port: 80  # port of service
+    selector:  # labels of pods for identifying them
+        app: myapp
+        type: backend
+```
+
+- `kubectl create -f <service-definition.yml>` to create the service object
+- `kubectl get services` to list the services
+
+## 3. <a id="load-balancer"></a>LoadBalancer
+- We saw that node port is used for connecting external/user facing application to the port on the node
+- Also, if node port is used to connect to multiple pods spread across mulitple nodes on a cluster then the user can use the IP of any of the nodes and the node port service will handle the load-balancing (check the image of [NodePort section](#nodeport-loadbalance))
+- But it's not ideal way for the users as they have to choose one out of many IPs of the nodes to connect to the application
+- The not so best way to solve this would be to have another node/server with nginx and configure load-balancing with it, so that users can use nginx domain name only and nginx load balances for us
+- Many major cloud service providers like AWS, GCP, Azure have the in-built loadbalancing feature and thus when we use K8s in those cloud and provide "LoadBalancer" service type definition by just overwriting the `type: NodePort` section of `spec` to `type: LoadBalancer` we can utilise the feature
 -----
+
 
 
 -----
@@ -248,3 +283,5 @@ spec:
 - [Networking](#networking)
 - [Services](#services)
     - [NodePort](#nodeport)
+    - [ClusterIP](#cluster-ip)
+    - [LoadBalancer](#load-balancer)
