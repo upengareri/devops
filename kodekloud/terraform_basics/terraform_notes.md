@@ -54,7 +54,7 @@
 
 > `resource` block is one of the many blocks that we have in TF. It is also the only mandatory block that TF requires to deploy any resource
 
-- A simple terraform workflow consists of 4 simple steps:
+- A simple __terraform workflow__ consists of 4 simple steps:
     1. Write configuration file
     2. `terraform init` out of many things it checks and configures, one is to read the provider and download necessary plugins related to the provider to work on the resource declared in the .tf file in step 1
     3. `terraform plan` optional to check the execution plan that will be carried out
@@ -89,6 +89,68 @@ __Destory File__
 `terraform destroy`
 
 -----
+## Terraform Providers
+- `terraform init` can be run multiple times; reads providers and downloads the plugins for the provider
+- plugins are downloaded in `.terraform/plugins` in the working directory containing the config files i.e ".tf" files
+- 3 types of providers:
+    1. Official - by harshicorp
+    2. Verified - by third party partners
+    3. Community - run by community
+
+-----
+## Configuration Directory
+- In TF, configuration directory is a directory that contains `.tf` files
+- While we can give configuration file any name, following naming convention is used for best practices -
+    1. __main.tf__: main config file containing resource definition
+    2. __variables.tf__: contains variable declarations
+    3. __outputs.tf__: contains outputs from resources
+    4. __providers.tf__: contains provider definition
+
+- Multiple providers can be used in a single configuration file. See example below -
+```hcl
+resource "local_file" "pets" {
+    filename = "/root/pets.txt"
+    content = "We love pets"
+}
+
+resource "random_pet" "my_pet" {  # random_pet is a resource type of provider random; check docs
+    prefix = "Mrs"
+    separator = "."
+    length = "1"
+}
+```
+- In the above configuration file, the two providers are local and random
+## <a id="variables"></a>Variables
+- Just like main.tf file, variable file also consists of block and arguments
+- variable name can be anything but a standard practice is to name it with the argument name for which we are using the variable
+![variable_example](./images/variable_example.png)
+- A variable block can have 3 arguments: default, type and description
+```hcl
+variable "filename" {
+    default = "/root/pets.txt"
+    type = string
+    description = "the path of the local file"
+}
+```
+- Some of the common variable types are 
+    - string
+    - number
+    - bool
+    - any (default type)
+- Example of number and bool
+```hcl
+variable "length" {
+    default = "2"
+    type = number
+    description = "length of the pet name"
+}
+variable "password_change" {
+    default = "true"
+    type = bool
+}
+```
+- Example of list type
+![variable_list](./images/variable_list.png)
 
 
 
@@ -96,3 +158,4 @@ __Destory File__
 -----
 # SUMMARY
 - [Terraform Syntax](#tf-syntax)
+- [Variables](#variables)
