@@ -116,7 +116,7 @@ resource "local_file" "pets" {
 resource "random_pet" "my_pet" {  # random_pet is a resource type of provider random; check docs
     prefix = "Mrs"
     separator = "."
-    length = "1"
+    length = 1
 }
 ```
 - In the above configuration file, the two providers are local and random
@@ -132,28 +132,83 @@ variable "filename" {
     description = "the path of the local file"
 }
 ```
-- Some of the common variable types are 
+### Variable Types 
     - string
     - number
     - bool
     - any (default type)
+    - list
+    - set
+    - tuple
+    - map
+    - object: collection of above types
 - Example of number and bool
 ```hcl
 variable "length" {
-    default = "2"
+    default = 2
     type = number
     description = "length of the pet name"
 }
 variable "password_change" {
-    default = "true"
+    default = true
     type = bool
 }
 ```
 - Example of list type
 ![variable_list](./images/variable_list.png)
+- To make it more restrictive, we can apply __type constraint__ as well
+![variable_list_type_constraint](./images/variable_list_type_constraint.png)
 
+> Set is similar to list except that set can't have duplicates
 
+> Tuple is similar to list except that list can only have elements of same type while tuple can have elements of multiple types e.g
+```hcl
+variable "kitty" {
+    type = tuple([string, number, bool])
+    default = ["cat", 7, true]
+}
+```
 
+- Example of map type
+![variable_map](./images/variable_map.png)
+- Similarly type constraint version of map would look like this:
+![variable_map_type_constraint](./images/variable_map_type_constraint.png)
+
+- Example of object type
+
+    ![object_type](./images/object_type.png)
+
+### Ways of Using Variables
+- We know that we can define default argument for a variable but that is optional. Other than defaul what are the other options?
+    
+    1. If we don't provide any value then terraform will prompt for the value used for `var.<variable_name>` in the `.tf` file in an interactive mode
+    2. Command line flags - only makes sense if less variables to pass
+    `terraform apply -var "filename=/root/pets.txt" -var "content=We love pets!"`
+    3. Environment variables - with `TF_VAR_<variable_name>` syntax - makes sense if less variables
+    ```bash
+    export TF_VAR_filename="/root/pets.txt"
+    export TF_VAR_content="We love pets!"
+
+    terraform apply
+    ```
+    4. Variable definition files - when dealing with a lot of variables
+
+    ![var_def_file](./images/var_def_file.png)
+
+    - This variable definition file can be named anything but should end with `.tfvars`, `.tfvars.json`
+    - As you can see in the image above, if you name the variable definition file as `terraform.tfvars` or `terraform.tfvars.json` or `*.auto.tfvars` or `*.auto.tfvars.json` then the file will be detected and loaded automatically
+    - But if not, for example, variables.tfvars then you need to provide it as command line flag `terraform apply -var-file variables.tfvars`
+
+### Variable Definition Precedence
+- If variable is defined in multiple ways, then terraform follows precedence to select the value
+![var_def_precedence](./images/var_def_precedence.png)
+- Terraform loads variables in the following order, with later sources taking precedence over earlier ones:
+    1. Environment variables
+    2. The `terraform.tfvars` file, if present
+    3. The `terraform.tfvars.json` file, if present
+    4. Any `*.auto.tfvars` or `*.auto.tfvars.json` files, processed in lexical order of their filenames
+    5. Any `-var` and `-var-file` options on the command line, in the order they are provided
+- So, from the above image the file will be created with name best-pet.txt
 
 -----
 # SUMMARY
