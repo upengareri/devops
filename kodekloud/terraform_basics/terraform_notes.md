@@ -252,7 +252,28 @@ output pet-name {
 - We know we can use reference expression to get the value of one resource as an input to another, we use output variable mainly for quickly displaying the value of provisioned resources on the screen
 - It can also be used to feed values to other configuration tools such as shell scripts or ansible
 -----
+## Terraform State
+- `terraform.state` single source of truth for what is deployed in the real world
+- Each resource created by TF would have unique id which is used to identify the resource in real world
+- It's terraform state that records the dependencies(implicit and explicit) b/w various resources and thus while deleting the resources it makes sure that the order is followed
+- In a real world scenario when working with team, it's ideal to keep the latest state file in a remote so that all team members use use it for the latest info. Some examples of places for keeping the state file are -
+    - AWS S3
+    - Terraform Cloud
+    - HashiCorp Consul
+- But why not in git? 
+    - We can store configuration files `.tf` files in git version control but it is not best practice to store state files in git. This is because state file may contain private info about resource such as private IP address, private dns and for DB it may also contain initial password in plain json format
+    - To keep this private info safe we should consider the above mentioned platforms instead of git
 
+### Terraform refresh
+
+- From stackoverflow:
+    - terraform refresh attempts to find any resources held in the state file and update with any drift that has happened in the provider outside of Terraform since it was last ran.
+
+    - For example, lets say your state file contains 3 EC2 instances with instance ids of i-abc123, i-abc124, i-abc125 and then you delete i-abc124 outside of Terraform. After running terraform refresh, a plan would show that it needs to create the second instance while a destroy plan would show that it only needs to destroy the first and third instances (and not fail to destroy the missing second instance).
+
+    - Terraform makes a very specific decision to not interfere with things that aren't being managed by Terraform. That means if the resource doesn't exist in its state file then it absolutely will not touch it in any way. This enables you to run Terraform alongside other tools as well as making manual changes in the AWS console. It also means that you can run Terraform in different contexts simply by providing a different state file to use, allowing you to split your infrastructure up into multiple state files and save yourself from catastrophic state file corruption.
+
+- By default terraform performs refresh operation on every call to `terraform plan` and `terraform apply`. But we can explicity call `terraform refresh` to refresh the state as well
 
 -----
 # SUMMARY
