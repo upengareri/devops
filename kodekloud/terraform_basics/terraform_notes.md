@@ -60,7 +60,7 @@
     3. `terraform plan` optional to check the execution plan that will be carried out
     4. `terraform apply`
 
-- `terraform show` inspects the state file and shows the resource details
+- `terraform show` shows the current state of infrastructure as seen by terraform
 
 > It is impossible to remember all types of providers and resource types and thus we can look at the terraforms comprehensive documentation to know the resource and their arguments
 
@@ -252,7 +252,7 @@ output pet-name {
 - We know we can use reference expression to get the value of one resource as an input to another, we use output variable mainly for quickly displaying the value of provisioned resources on the screen
 - It can also be used to feed values to other configuration tools such as shell scripts or ansible
 -----
-## Terraform State
+## <a id="tf-state"></a>Terraform State
 - `terraform.state` single source of truth for what is deployed in the real world
 - Each resource created by TF would have unique id which is used to identify the resource in real world
 - It's terraform state that records the dependencies(implicit and explicit) b/w various resources and thus while deleting the resources it makes sure that the order is followed
@@ -269,11 +269,73 @@ output pet-name {
 - From stackoverflow:
     - terraform refresh attempts to find any resources held in the state file and update with any drift that has happened in the provider outside of Terraform since it was last ran.
 
-    - For example, lets say your state file contains 3 EC2 instances with instance ids of i-abc123, i-abc124, i-abc125 and then you delete i-abc124 outside of Terraform. After running terraform refresh, a plan would show that it needs to create the second instance while a destroy plan would show that it only needs to destroy the first and third instances (and not fail to destroy the missing second instance).
+    - For example, lets say your state file contains 3 EC2 instances with instance ids of i-abc123, i-abc124, i-abc125 and then you delete i-abc124 outside of Terraform. After running terraform refresh, a plan would show that it needs to create the second instance while a destroy plan would show that it only needs to destroy the first and third instances (and not fail to destroy the missing second instance)
 
     - Terraform makes a very specific decision to not interfere with things that aren't being managed by Terraform. That means if the resource doesn't exist in its state file then it absolutely will not touch it in any way. This enables you to run Terraform alongside other tools as well as making manual changes in the AWS console. It also means that you can run Terraform in different contexts simply by providing a different state file to use, allowing you to split your infrastructure up into multiple state files and save yourself from catastrophic state file corruption.
 
-- By default terraform performs refresh operation on every call to `terraform plan` and `terraform apply`. But we can explicity call `terraform refresh` to refresh the state as well
+- Any changes made to terraform outside it's control for e.g manual update, terraform refresh command will pick it up and update the state file
+- This reconciliation will determine what action to take on the next `terraform plan/apply` command
+- This command will not modily any infra resource but only the state file
+- By default terraform performs refresh operation on every call to `terraform plan` and `terraform apply`. But we can explicity call `terraform refresh` to refresh the state as well which to be honest is really needed
+- We can bypass refresh on plan/apply by using flag `-refresh=false`
+-----
+## <a id="tf-commands"></a>Terraform Commands
+- `terraform init`, `terraform plan`, `terraform apply`
+- `terraform validate` to validate the configuration file (sort of linting)
+- `terraform fmt` formats the configuration file (sort of like black in python)
+- `terraform show` shows the current state of infrastructure as seen by terraform
+- `terraform providers` shows the providers used in the configuration directory
+- `terraform output` and `terraform output <output_var_name>` to show the output values
+- `terraform refresh` to sync terraform state file with the real world infrastructure
+- `terraform graph` shows resources and their dependencies (needs tweak for sensible visualisation)
+
+- In order to avoid show of all resources from state file and only choose a particular resource then we can use `terraform state show <resource_type.resource_name>`
+-----
+## <a id="lifecycle"></a>Lifecycle Rules
+
+### 1. `create_before_destroy`
+- By default, tf destroys the resource and then creates it in case of any update in the configuration file
+- There might be a scenario when you wan't to create the resource first and then destroy the old one
+- To do that we use `create_before_destroy` command e.g
+```hcl
+resource "local_file" "pet" {
+    filename = "/root/pets.txt"
+    content = "We love pets!"
+    file_permission = 0700
+
+    lifecycle {
+        create_before_destroy = true  # new resource is created first before deleting old one
+    }
+}
+```
+### <a id="create-before-destroy-gotcha"></a>Why `create_before_destroy` doesn't always work?
+- While the above example was just to show an example of the rule, it not always works in favor of you
+- For example, if in the above case the file is created and then you update the configuration file with let's say a different file permission or text, and then run `terraform apply` again, what do you think will happen?
+- Well you will see that the file does not exist anymore. This is because with `create_before_destroy` the file will be created or to be precise overwritten (meaning the same filename will be created and since the same file cannot be created again it will overwrite the old file) and then the same file will be destroyed
+- This is because the __filename__ argument of `local_file` is not unique and thus we can't have 2 instances of the same file at the same time
+### 2. `prevent_destroy`
+- There might also be a case where we don't want to destory the resource for any reason
+- To do that we can use `prevent_destroy` e.g
+```hcl
+resource "local_file" "pet" {
+    filename = "/root/pets.txt"
+    content = "We love pets!"
+    file_permission = 0700
+
+    lifecycle {
+        prevent_destroy = true  # this will prevent resource from being deleted and will throw error
+    }
+}
+```
+- We use `prevent_destroy` for protecting important resources like db against accidental deletion
+> Note: `terraform destroy` can override and thus delete the resource
+- `prevent_destroy` only prevents deletion from __changes on configuration and subsequent apply__
+
+### 3. `ignore_changes`
+- Ignore any change made to a resource attribute (specific/all)
+![ignore_change](./images/ignore_change.png)
+- In the above image, any change made to the tags or the ami attribute (you can also put `all` as an item) will be ignored
+- Need to learn more about the use-case of it
 
 -----
 # SUMMARY
@@ -285,5 +347,9 @@ output pet-name {
 - [Reference Expression](#resource-attribute)
 - [Resource Dependency](#resource-dependency)
 - [Output Variables](#output-variables)
+- [Terraform State](#tf-state)
+- [Terraform Commands](#tf-commands)
+- [Lifecycle Rules](#lifecycle)
+    - [create-before-destroy-gotcha](#create-before-destroy-gotcha)
 
 - `terraform show`
