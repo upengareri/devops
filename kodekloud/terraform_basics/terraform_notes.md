@@ -275,7 +275,7 @@ output pet-name {
 
 - Any changes made to terraform outside it's control for e.g manual update, terraform refresh command will pick it up and update the state file
 - This reconciliation will determine what action to take on the next `terraform plan/apply` command
-- This command will not modily any infra resource but only the state file
+- This command won't modify any infra resource but only the state file
 - By default terraform performs refresh operation on every call to `terraform plan` and `terraform apply`. But we can explicity call `terraform refresh` to refresh the state as well which to be honest is really needed
 - We can bypass refresh on plan/apply by using flag `-refresh=false`
 -----
@@ -336,7 +336,40 @@ resource "local_file" "pet" {
 ![ignore_change](./images/ignore_change.png)
 - In the above image, any change made to the tags or the ami attribute (you can also put `all` as an item) will be ignored
 - Need to learn more about the use-case of it
+-----
+## <a id="data"></a>DataSources
+- allows tf to read attributes of resources that were provisioned outside its control
+![datasource_example](./images/datasource_example.png)
+- The above image shows an example of text file called dog.txt which was created outside of tf using a shell script. Now, in order to read the content of that file we can create `data` block which is quite similar to `resource` block
+- To use the above read data object we can use something like `data.local_file.<data_name>.<attribute>` details of which can be found in the documentation
+![resource_vs_datasource](./images/resource_vs_datasource.png)
 
+-----
+## Meta Arguments
+- Some already seen examples of meta arguments are - `depends_on` (for explicit dependency), `lifecycle` for lifecycle rule
+- `count`
+    ![count](./images/count.png)
+    - If we want to let's say create 3 files then we can use `count` meta-argument to repeat the block
+    - `length` is an in-built function of tf
+    ### Drawback of `count` while updating the block
+    - However there is one significant drawback of `count` which is shown via image below
+        ![count_drawback](./images/count_drawback.png)
+        - In the image, you can see that we have deleted the pets.txt file and when we run apply, tf does 2 replace and 1 destroy
+        - This is because with count resources becomes list of resources and thus pet[0] as pets.txt, pet[1] as dogs.txt and pet[2] as cats.txt and now after the change it thinks pet[0] should be dogs.txt and pet[1] as cats.txt and thus replaces pet[0] and pet[1] resource name and destroys pet[2]
+            ![count_drawback_reason](./images/count_drawback_reason.png)
+- <a id="for-each"></a>`for_each`
+    - To fix the above drawback of count, we use `for_each` instead of `count`
+    - `for_each` creates map of logical resources instead of list and thus when deleting/updating the resources tf lookups for the key rather than index
+    > Note: `for_each` supports only `set` and `map` thus we have 2 options
+
+    __Option 1: Set variables as `set` type in `variables.tf`__
+    ![for_each_1](./images/for_each_1.png)
+    
+    __Option 2: Use in-built `toset` to type cast list to set in `main.tf`__
+    ![for_each_2](./images/for_each_2.png)
+
+
+        
 -----
 # SUMMARY
 - [Terraform Syntax](#tf-syntax)
@@ -344,12 +377,14 @@ resource "local_file" "pet" {
     - [Variable Types](#variable-types)
     - [How to pass variables](#pass-variables)
     - [Variable Precedence](#variable-precedence)
+- [Output Variables](#output-variables)
 - [Reference Expression](#resource-attribute)
 - [Resource Dependency](#resource-dependency)
-- [Output Variables](#output-variables)
 - [Terraform State](#tf-state)
 - [Terraform Commands](#tf-commands)
 - [Lifecycle Rules](#lifecycle)
     - [create-before-destroy-gotcha](#create-before-destroy-gotcha)
+- [Data Block](#data)
+- ["for_each" Meta Argument](#for-each)
 
 - `terraform show`
