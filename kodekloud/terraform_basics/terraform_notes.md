@@ -159,7 +159,7 @@ variable "password_change" {
 - To make it more restrictive, we can apply __type constraint__ as well
 ![variable_list_type_constraint](./images/variable_list_type_constraint.png)
 
-> Set is similar to list except that set can't have duplicates
+> Set is similar to list except that set can't have duplicates; default is list type 
 
 > Tuple is similar to list except that list can only have elements of same type while tuple can have elements of multiple types e.g
 ```hcl
@@ -253,7 +253,7 @@ output pet-name {
 - It can also be used to feed values to other configuration tools such as shell scripts or ansible
 -----
 ## <a id="tf-state"></a>Terraform State
-- `terraform.state` single source of truth for what is deployed in the real world
+- `terraform.tfstate` - single source of truth for what is deployed in the real world
 - Each resource created by TF would have unique id which is used to identify the resource in real world
 - It's terraform state that records the dependencies(implicit and explicit) b/w various resources and thus while deleting the resources it makes sure that the order is followed
 - In a real world scenario when working with team, it's ideal to keep the latest state file in a remote so that all team members use use it for the latest info. Some examples of places for keeping the state file are -
@@ -368,6 +368,29 @@ resource "local_file" "pet" {
     __Option 2: Use in-built `toset` to type cast list to set in `main.tf`__
     ![for_each_2](./images/for_each_2.png)
 
+    - Now, when we delete any resource file, only that resource will be deleted as expected
+    ![count_vs_for_each](./images/count_vs_for_each.png)
+
+-----
+## <a id="version"></a>Version Contraints
+- When we run `terraform init` it downloads the latest plugins for the providers in the configuration file
+- It could be the case that the new plugin update has deprecated some syntax in the configuration and thus we don't want to use that version of plugin for now. To do that we can use version constraint with `terraform` block as shown in image below - 
+    ![version_constraint](./images/version_constraint.png)
+
+> Note: We can use terraform documentation on provider to check the versions and how to use verison contraint for the provider
+
+- We can provide multiple providers under `required_providers` block
+### Ways to provide version constraint
+- `version = "1.4.0"`
+- `version = "!= 2.0.0"`
+- `version = "< 1.4.0"`
+- `version = "> 1.2.0, < 2.0.0, != 1.4.0"`
+- `version = "~> 1.2"` 1.2 or incremental addition of a version like 1.3, 1.4 and so on
+- `version = "~> 1.2.0"` 1.2.0 or 1.2.1 and so on (mind that it won't check 1.3.* but only 1.2.*)
+
+-----
+
+
 
         
 -----
@@ -386,5 +409,6 @@ resource "local_file" "pet" {
     - [create-before-destroy-gotcha](#create-before-destroy-gotcha)
 - [Data Block](#data)
 - ["for_each" Meta Argument](#for-each)
+- [Version Contraints](#version)
 
 - `terraform show`
