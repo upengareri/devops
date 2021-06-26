@@ -389,7 +389,26 @@ resource "local_file" "pet" {
 - `version = "~> 1.2.0"` 1.2.0 or 1.2.1 and so on (mind that it won't check 1.3.* but only 1.2.*)
 
 -----
+## Terraform with AWS
+### IAM
+- User: individual access to AWS
+- Group
+    - collection of users
+    - if we have to give same permission to 100 users, we can create group and attach that permission in form of policy to the group and add those users to that group. This way we don't need to attach same policy to those 100 users
+    - if we need to later give any extra permission to some users of that group we can additionally attach permission in form of policy to those special users. This means users can have group policy as well as individual level attached policy
+- Policy: used for granting permission for a resource/service to user/group/role
+    - AWS Managed Policy
+    - Custom Policy
+- Role
+    - we create role so that a resource/service such as EC2 can, let's say, read/write data on S3. A policy should be attached to role so that it can do stuff
+        
+        ![role_to_ec2](./images/role_to_ec2.png)
+    - apart from one resource being able to perform certain actions on another resource on our behalf, role can also be assigned to below scenarios
 
+        - providing access to IAM user belonging to another AWS account
+        - providing access to applications interacting with services/resources on AWS
+        - providing access to users managed outside of AWS
+        ![other_roles](./images/other_roles.png)
 
 
         
