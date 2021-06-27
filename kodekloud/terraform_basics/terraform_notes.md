@@ -410,8 +410,59 @@ resource "local_file" "pet" {
         - providing access to users managed outside of AWS
         ![other_roles](./images/other_roles.png)
 
+-----
+### AWS Programmatic Access
+- We need to download `aws cli` and install it
+- After install, we need to configure it with `aws configure` command
+- Below image shows the configuration and how to read the configured data
+    ![aws_configure](./images/aws_configure.png)
 
-        
+- CLI Syntax
+
+    `aws <command> <sub-command> <options and parameters>` e.g `aws s3 create-user --user-name lucy`
+- __ARN: Amazon Resource Name__ - unique identifier for resource in AWS
+-----
+### IAM with Terraform
+```hcl
+resource "aws_iam_user" "admin-user" {
+    name = "lucy"  # mandatory field
+    tags = {
+        Description = "Technical Team Leader"
+    }
+}
+```
+- If we try to run terraform plan with this we might get 2 errors:
+    1. region error: terraform expects region even for global resources such as IAM
+    2. authentication to AWS error
+- One easy option is to provide a provider block such as -
+```hcl
+provider "aws" {
+    region = "us-west-2"
+    access_key = "foo"
+    secret_key = "bar"
+}
+```
+- Providing secret key in version control is bad. Best practice is to either put access key in `.aws/credentials` folder or use env variable e.g `export AWS_ACCESS_KEY_ID=foo` etc.
+- For region, we can keep the provider block or we can use environment variable for that as well
+- Now that we have created the user, we can create policy and attach it to the user
+- If you look at the terraform doc for `aws_iam_policy` you will find that the only mandatory field is policy which requires JSON document
+- To provide JSON doc in our configuration file, the easiest way is to  make use of __HEREDOC SYNTAX__ which is commonly used in command line scripting languages such as bash scripts to provide multiline commands
+- Heredoc syntax
+    ```heredoc
+        [COMMAND] <<DELIMITER
+          line1
+          line2
+          ...
+        DELIMITER
+    ```
+    > delimiter can be any string but commonly used is `EOF` which means end of file
+- command in our case would be `policy` argument <a id="iam-tf"></a>
+
+    ![aws_iam_example](./images/aws_iam_example.png)
+- Instead of `heredoc syntax` we can use `file` method to load the json file
+    ![aws_iam_example_2](./images/aws_iam_example_2.png)
+-----
+
 -----
 # SUMMARY
 - [Terraform Syntax](#tf-syntax)
@@ -429,5 +480,6 @@ resource "local_file" "pet" {
 - [Data Block](#data)
 - ["for_each" Meta Argument](#for-each)
 - [Version Contraints](#version)
+- [IAM in Terraform](#iam-tf)
 
 - `terraform show`
