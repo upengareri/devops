@@ -210,13 +210,13 @@ variable "kitty" {
     5. Any `-var` and `-var-file` options on the command line, in the order they are provided
 - So, from the above image the file will be created with name best-pet.txt
 -----
-## Resource Attribute
+## <a id="reference-expression"></a>Reference Expression
 - `<resource_type>.<resource_name>.<resource_attribute>`
 - In production, it is command that the resources would be dependent on each other and thus could be the case that the output of one resource is input to another
 - Below images shows example of using the attribute of `random_pet` in `local_file`
     <a id="resource-attribute-example"></a>![resource_attribute](./images/resource_attribute.png)
 - If we check the documentation of `random_pet` resource type, we can see that it supports `id` resource attribute
-- <a id="resource-attribute"></a>In syntax `${random_pet.my-pet.id}`, `${}` is used above for string interpolation i.e convert the result to string
+- __Reference Interpolation:__ In syntax `${random_pet.my-pet.id}`, `${}` is used above for string interpolation i.e convert the result to string
 -----
 ## <a id="resource-dependency"></a>Resource Dependency
 - When you reference resource attribute of one resource into another resource like in the [above example](#resource-attribute-example), terraform automatically detects that `random_pet` should be created before `local_file` and similarly while deleting the resources it does it in opposite order i.e deletes `local_file` first and then `random_pet`. This is called __IMPLICIT DEPENDENCY__
@@ -462,6 +462,54 @@ provider "aws" {
 - Instead of `heredoc syntax` we can use `file` method to load the json file
     ![aws_iam_example_2](./images/aws_iam_example_2.png)
 -----
+### S3
+- bucket name should be unique as aws creates a DNS name based on it, which can be accessed by anyone from anywhere
+- initially, no one can access the bucket and it's objects, except the bucket owner
+- access to s3 are governed by
+    1. bucket policy: access at bucket level
+    2. access control list: access/permission at an object level
+-----
+### S3 with Terraform
+- ![s3_example](./images/s3_example.png)
+- In above image we have created s3 bucket and an object inside the bucket
+- In the image, finance-analysts is the group that was created manually and now needs access to the bucket object
+- In order to tell .tfstate which is the source of truth for tf about that manual resource we use `data` block
+- Finally we can make use of bucket policy to allow group to access the bucket object
+    ![bucket_policy](./images/bucket_policy.png)
+
+-----
+## Remote State
+- As we discussed earlier `.tfstate` is the only source of truth for terraform to know about real world infrastructure
+- state file is generated locally when we run `terraform plan/apply`
+- we learnt that storing state file in git version control is not ideal because:
+    1. it contains sensitive information about the infrastructure/resources such as private ip, dns etc.
+    2. git doesn't support state locking and thus if 2 developers operate on the state file at the same time it might lead to corruption of state file or other infrastructure issues
+- services such as S3, terraform cloud and hashicorp consul provide state locking 
+## <a id="remote-backend"></a>Remote Backend with S3
+- Prerequisites
+    1. __S3:__ to store .tfstate file
+    2. __Dynamodb:__ for implementing state locking
+    > S3 and Dynamodb resource has to be created to implement remote backend
+- Now to create any resource e.g `local_file` we can either use terraform block in the main configuration file or create another config file `terraform.tf` and put terraform block there which is best practice as seen in the image below -
+![remote_backend](./images/remote_backend.png)
+    > bucket, key(folder location) and dynamodb should already exist for the terraform backend block to work
+- If you already have state file locally then after implementing remote backend shown in RHS of the image, if you run terraform apply it will throw error saying "reinitialization required"
+- On running `terraform init` again will initialise new backend to be used and since we already have state file locally, it will give us option (yes/no) to copy it to remote backend
+- `rm -rf terraform.tfstate`: we can now delete the local state file
+- Running `terraform plan/apply` will lock the state file and pull it down from s3 bucket into memory and any subsequent changes to the state will be instantaneously uploaded to s3 and once the operation is complete the lock will be released
+- state file will not be stored in the local configuration file anymore
+```
+Summary:
+    1. create bucket, key and dynamodb
+    2. create terraform backend block in a separate file
+    3. `terraform init` to initialise with new backend state file instead of local storage
+    4. `rm -rf terraform.tfstate` to remote local state file
+    5. on running `terraform apply`, it will __lock__, __update__(if required) and __unlock__
+```
+-----
+
+
+-----
 
 -----
 # SUMMARY
@@ -471,7 +519,7 @@ provider "aws" {
     - [How to pass variables](#pass-variables)
     - [Variable Precedence](#variable-precedence)
 - [Output Variables](#output-variables)
-- [Reference Expression](#resource-attribute)
+- [Reference Expression](#reference-expression)
 - [Resource Dependency](#resource-dependency)
 - [Terraform State](#tf-state)
 - [Terraform Commands](#tf-commands)
@@ -481,5 +529,7 @@ provider "aws" {
 - ["for_each" Meta Argument](#for-each)
 - [Version Contraints](#version)
 - [IAM in Terraform](#iam-tf)
+- [Remote Backend](#remote-backend)
+    - [state commands](#state-command)
 
 - `terraform show`
