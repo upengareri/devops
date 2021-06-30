@@ -342,7 +342,7 @@ resource "local_file" "pet" {
 ![datasource_example](./images/datasource_example.png)
 - The above image shows an example of text file called dog.txt which was created outside of tf using a shell script. Now, in order to read the content of that file we can create `data` block which is quite similar to `resource` block
 - To use the above read data object we can use something like `data.local_file.<data_name>.<attribute>` details of which can be found in the documentation
-![resource_vs_datasource](./images/resource_vs_datasource.png)
+- ![resource_vs_datasource](./images/resource_vs_datasource.png)
 
 -----
 ## Meta Arguments
@@ -507,9 +507,83 @@ Summary:
     5. on running `terraform apply`, it will __lock__, __update__(if required) and __unlock__
 ```
 -----
+## Terraform State Commands
+- terraform state file should not be edited manually
+- `terraform state <subcommand> [options] [args]`
+    - `terraform state list [options] [address]`: lists all the tf resources (only resource names)
+        - we can also pass particular resource name
+    - `terraform state show [options] [address]`: show resources and their attributes
+        - we can also pass particular resource name e.g
+            ![tf_show_example](./images/tf_show_example.png)
+    - `terraform state mv [options] SOURCE DESTINATION`: can be used to rename resource or move resource from one state file to another. Resource name in the configuration file such as main.tf then has to be manually changed
+    - `terraform state pull` to display the state file that is stored remotely. The output can then be passed to json query `jq` to filter the resource e.g
+        ![tf_state_pull](./images/tf_state_pull.png)
+    - `terraform state rm ADDRESS` to remove resource from state file. The resource (block) has to be manually removed from configuration file as well
+        - This command is used if you no longer want to maintain a resource via tf
+        - The removed resource is not destroyed but only removed from tf management
+        
+<a id="state-command"></a>
 
+> - `terrafrom state [ pull | show | list | mv | rm ]`
+-----
+## <a id="provisioner"></a>Terraform Provisioners
+- `user_data` is native to AWS and is used for running a command or script when EC2 is provisioned
+- Similar to that tf provides __provisioners__ which can be used to run a command or script when a resource is provisioned
+- 1. `remote-exec` provisioner with which we can run command(s) or script on a remote machine
+    - pre-requisites for `remote-exec` to work
+        - __n/w connectivity__ b/w local and remote machine by making sure the right security group is set up to allow traffic in to the remote machine
+        - __authentication__ such as ssh key pair for ubuntu
+    e.g
+    ![remote-exec_example](./images/remote_exec_example.png)
+
+    - `remote-exec` block is defined as a nested block within resource block
+
+    > In the above image n/w connectivity is happening via vpc_security_groups_ids attribute and authentication via connection block
+- 2. `local-exec` provisioner is run on machine where we are running the terraform binary
+    - defined within resource block 
+    - below is an example of `local-exec` to write the public ip of ec2 locally in a file
+    ![local-exec_example](./images/local_exec_example.png)
+
+### Provisioner Behaviour
+- Default behaviour of provisioner is to run task when the resource is created. This is known as __creation time provisioner__
+- We can also run the provisioner before the resource is destroyed (__destroy time provisioner__) with `when` attribute e.g
+```hcl
+resource "aws_instance" "webserver" {
+    ami             = "ami-xyz"
+    instance_type   = "t2.micro"
+    provisioner "local-exec" {
+        on_failure = fail
+        command = "echo Instance ${aws_instance.webserver.public_ip} Created! > /temp/instance_state.txt"
+    }
+    provisiioner "local-exec" {
+        when = destroy
+        command = "echo Instance ${aws_instance.webserver.public_ip} Created! > /temp/instance_state.txt"
+    }
+}
+```
+- In the above code you can notice that the first provisioner has wrong location i.e "/temp/...". In scenarios such as this, where we can wrong configuration syntax or error, then in that case provisioner block and thus tf fails
+- `on_failure = fail` is the default behaviour and thus when not mentioned will fail
+- But sometimes if you don't want tf to fail because of provisioner then you can use `on_failure = continue`. This feature could be used if the provisioner task is not so important
+
+### <a id="provisioner-consideration"></a>Provisioner Considerations
+- It is recommened by terraform to use provisioners that are native to resource for e.g `user_data` by ec2 in aws
+- It is recommended to keep post-provisioning task to minimum and use custom AMIs that will use all the softwares and configurations beforehand. This is where custom AMIs come into picture and we can use tools such as __PACKER__ to customize image in a declarative way.
 
 -----
+## Terraform Taint/Replace (Forcing re-creation of resources)
+- We saw in `provisioner "local-exec"` example that if provisioner had some error, even though resource ami was successful, tf fails to create that resource
+- This is an example of a damaged resource and tf marks that resource as __tainted__ and when you try to run `terraform plan` on next step, it tries to re-create that tainted resource
+- `taint` command has been deprecated and is recommended to use `replace` e.g `terraform apply -replace="aws_instance.example[0]"`
+- Any resource marked as tainted would be replaced in next plan and thus could lead to confusion if other team member uses plan subsequently. See more for why taint is deprecated - https://www.terraform.io/docs/cli/commands/taint.html
+- We may want to use replace command instead of destroy and create again in some scenarios for e.g if any manual change was done to a resource managed by tf. You can destroy and create that resource again but better way is to use replace
+-----
+## Debugging (Logging)
+- 5 log levels: INFO, WARNING, ERROR, DEBUG, TRACE (provides the most details)
+- `export TF_LOG=TRACE` use environment variable to enable levels 
+- `export TF_LOG_PATH=/tmp/terraform.log` to save log in a file
+- `unset TF_LOG` to disable log completely
+-----
+
 
 -----
 # SUMMARY
@@ -531,5 +605,8 @@ Summary:
 - [IAM in Terraform](#iam-tf)
 - [Remote Backend](#remote-backend)
     - [state commands](#state-command)
+- [Bootstrapping using Provisioners](#provisioner)
+    - [Provisioner Considerations](#provisioner-consideration)
+
 
 - `terraform show`
