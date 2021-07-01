@@ -583,8 +583,32 @@ resource "aws_instance" "webserver" {
 - `export TF_LOG_PATH=/tmp/terraform.log` to save log in a file
 - `unset TF_LOG` to disable log completely
 -----
-
-
+## Terraform Import
+- While `data` block allows us to read attributes of resources that are outside of tf, it does not allow tf to manage the resource
+- e.g to public ip of ec2 created outside of tf management we can do 
+```hcl
+data "aws_instance" "newserver" {
+    instance_id = "xyz"
+}
+output newserver {
+    value = data.aws_instance.newserver.public_ip
+}
+```
+- To bring resource under tf management, we can make use of terraform import command<a id="import"></a>
+- `terraform import <resource_type>.<resource_name> <attribute>`
+    - here attribute can be anything that can uniquely identify that resource such as id
+    e.g `terraform import aws_instance.webserver i-026e13be93bsk320y5`
+    - If you run this command without manually updating the configuration file (as of tf version 0.13) then it will throw error. This is because import will only update the state file and not the configuration file
+    - In order to remove that error we need to write an empty resource block like this -
+        ```hcl
+        resource "aws_instance" "webserver" {
+            # (resource arguments)
+        }
+        ```
+    - After running the terraform import successfully, we can fill the empty resource block by looking at the web console or from state file (which will get updated after the import command)
+    - If you try to run `terraform plan` with empty resource block then it will throw error as the required arguments are missing
+    - After filling the arguments, if you now run `terraform plan` it will say "No change" as the resource already exist and will carry out no action
+- Now the resource will be in tf's control
 -----
 # SUMMARY
 - [Terraform Syntax](#tf-syntax)
@@ -607,6 +631,7 @@ resource "aws_instance" "webserver" {
     - [state commands](#state-command)
 - [Bootstrapping using Provisioners](#provisioner)
     - [Provisioner Considerations](#provisioner-consideration)
+- [Terraform Import](#import)
 
 
 - `terraform show`
