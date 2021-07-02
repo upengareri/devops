@@ -609,6 +609,65 @@ output newserver {
     - If you try to run `terraform plan` with empty resource block then it will throw error as the required arguments are missing
     - After filling the arguments, if you now run `terraform plan` it will say "No change" as the resource already exist and will carry out no action
 - Now the resource will be in tf's control
+
+-----
+## <a id="modules"></a>Modules
+- Terraform considers everything under configuration directory as configuration file as long as the extension is `.tf`
+- Root module
+    - It is a directory (containing the configuration files) from where we are running the terraform command
+    - It changes based on which module we are currently in
+        
+        __Use Case 1:__
+        ![root_module_1](./images/root_module_1.png)
+        - In the above image we are in aws-instance directory and thus that becomes our root module
+        
+        __Use Case 2:__
+        ![root_module_2](./images/root_module_2.png)
+        - In above image, we are creating another dev instance in a different module so instead of copying code from aws-instance we can reuse by using `module` block
+        - As we are now running tf command from development directory, it now becomes the root module and the module that it is inheriting becomes child module
+        - Child module is specified as the relative path to the root module but can also be absolute path
+- We can pass variables in the module block as well e.g
+    ![module_block](./images/module_block.png)
+- Modules are similar to packages and third-party libraries that we see in other programming languages
+- We can also make use of remote modules which are modules available in terraform registry
+-----
+## <a id="functions"></a>Terraform Built-in Functions
+- `terraform console` tf provides playground console for us to play around with the built-in tf functions
+- Terraform also loads the state files associate with that configuration directory and it also loads variables file
+- Below image shows an example usage of `terraform console` to explore functions such as `file`, `length`, `toset`
+    ![console_1](./images/console_1.png)
+
+### Numeric Functions
+![numeric_functions](./images/numeric_functions.png)
+> Note that in `max(var.num...)` the 3 dots are used to unpack the values
+
+### String Functions
+![string_functions_1](./images/string_functions_1.png)
+
+### Collection Functions
+![collection_functions](./images/collection_functions.png)
+
+### Map Functions
+![map_functions](./images/map_functions.png)
+
+----
+## Conditional Expressions
+
+- you can also play around with various conditional expressions and operations in `terraform console` as well
+```bash
+$ terraform console
+> 1 + 2  # numeric operators
+3
+
+> 8 != "8"  # equality operators
+true
+
+> 5 <= 4  # comparison operators
+false
+
+> 
+```
+
 -----
 # SUMMARY
 - [Terraform Syntax](#tf-syntax)
@@ -632,6 +691,8 @@ output newserver {
 - [Bootstrapping using Provisioners](#provisioner)
     - [Provisioner Considerations](#provisioner-consideration)
 - [Terraform Import](#import)
+- [Modules](#modules)
+- [Functions](#functions)
 
 
 - `terraform show`
