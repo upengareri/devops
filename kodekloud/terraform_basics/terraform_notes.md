@@ -665,8 +665,15 @@ true
 > 5 <= 4  # comparison operators
 false
 
-> 
+> ! (var.b > 30)  # logical operators
+true
 ```
+- But how to make use of these conditional expressions in tf. Below image shows an example of random password generator that will generate password with min length 8
+
+![conditional_example](./images/conditional_example.png)
+
+> `condition ? true_val : false_val`
+
 
 -----
 # SUMMARY
