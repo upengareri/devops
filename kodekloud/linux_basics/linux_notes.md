@@ -282,6 +282,16 @@ To perform password-less ssh to remote server we need to copy our public ssh key
 - `ssh-keygen -t rsa` creates public and private key at `~/.ssh/`
 - `ssh-copy-id bob@devapp1` copies your public ssh key to a file (in `~/.ssh/authorized_keys`) in remote host called devapp1
 > This command will prompt you for the password but next time when you ssh into that machine, it won't ask your password
+
+### ssh-add
+`man ssh-add`:
+> ssh-add adds private key identities to the authentication agent, ssh-agent(1). When run without arguments, it adds the files ~/.ssh/id_rsa, ~/.ssh/id_dsa, ~/.ssh/id_ecdsa and ~/.ssh/identity.[...]
+> Identity files should not be readable by anyone but the user. Note that ssh-add ignores identity files if they are accessible by others.
+
+When ssh-add -l returns “The agent has no identities”, it means that keys used by ssh (stored in files such as ~/.ssh/id_rsa, ~/.ssh/id_dsa, etc.) are either missing, they are not known to ssh-agent, which is the authentication agent, or that their permissions are set incorrectly (for example, world writable).
+If your keys are missing or if you have not generated any, use `ssh-keygen -t rsa`, then `ssh-add` to add them.
+If keys exist but are not known to ssh-agent (like if they are in a non-standard folder), use `ssh-add /path/to/my-non-standard-ssh-folder/id_rsa` to add them. Example - `ssh-add ~/.ssh/id_rsa`
+
 -----
 ## SCP
 Utility tool to copy files/directories to remote server using ssh. As long as you have remote access to server via ssh you can use this command.
