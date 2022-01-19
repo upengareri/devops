@@ -236,6 +236,16 @@ sum=$?
 - Use google shell style guide while writing the script - https://google.github.io/styleguide/shellguide.html
 
 > `$()` vs `$(())` vs `[[  ]]`
+-----
+## Additional Notes Collected
+__xargs__:
+
+- it takes output of a command and passes it as an argument to another command. If no command is specified, xargs executes echo by default.
+ 
+ Example:
+ ```bash
+find . -name "*JIRA_THREADS*" | xargs grep -c http-nio-8080-exec
+ ```
 
 -----
 EXTRA:
