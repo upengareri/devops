@@ -26,9 +26,12 @@ echo "$VAR5"
 VAR6="VALID"
 VAR7="THIS IS $VAR6 variable" # variable and literal are separated by space
 ```
+
 Output:
+```
 Hello, World
 Hello, World
+```
 -----
 ## Command line arguments
 - `$0`, `$1` and so on are special built-in arguments $0: holds script name while others holds arguments passed
@@ -246,6 +249,29 @@ __xargs__:
  ```bash
 find . -name "*JIRA_THREADS*" | xargs grep -c http-nio-8080-exec
  ```
+ Difference between `xargs` and `exec {}`:
+```bash
+find . -name "*.c" -exec ls -al {} \;  # executes the command ls -al on each individual file. closing semicolon (escaped to avoid the shell eating it) closes the command and additionally means that the command is to be executed once for every match
+
+find . -name "*.c" | xargs ls -al  # constructs an argument list from the output of the find command and passes it to ls.
+```
+consider the below produced output of the find command:
+```bash
+a.c
+b.c
+c.c
+```
+the first command(exec) would execute
+```bash
+ls -l a.c
+ls -l b.c
+ls -l c.c
+```
+but the second (xargs) would execute
+```bash
+ls -l a.c b.c c.c
+```
+-----
 
 -----
 EXTRA:

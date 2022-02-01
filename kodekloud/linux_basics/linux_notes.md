@@ -132,6 +132,9 @@ __Hardwares__
 -----
 ## Files
 - `du -sh <file>` **tells you the size of the file (-s: specified file, -h: human readable format)**
+- `du -sh <file>` is very slow when it comes to recursive folder i.e deep nested files and folders inside the directory and for this we can use below command -
+> `find -maxdepth 1 -type d -name '[!.]*' -exec du -sh {} + | sort -hr`
+> `-name '[!.]*'` to exclude hidden files and `sort -hr` to sort in reverse human readable form
 - `ls -lh <file>` can also tell you about the size of the file
 
 ### tar (take archive)
